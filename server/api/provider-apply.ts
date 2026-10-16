@@ -56,3 +56,4 @@ export async function handlePostProviderApplication(request: NextRequest) {
     );
   }
 }
+

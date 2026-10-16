@@ -44,3 +44,4 @@ export const adminSuspendActionSchema = z.object({
 });
 
 export type AdminSuspendActionInput = z.infer<typeof adminSuspendActionSchema>;
+
