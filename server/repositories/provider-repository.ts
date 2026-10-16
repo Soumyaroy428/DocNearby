@@ -6,6 +6,7 @@ import {
   SubmissionStatus,
 } from '@/shared/types/provider';
 import { DEMO_PROVIDERS } from '@/server/data/mock-providers';
+import { getMongoDb, isMongoConfigured } from '@/server/db/mongodb';
 
 export interface IProviderRepository {
   findProviders(filters: SearchFilters): Promise<PaginatedResult<Provider>>;
@@ -293,4 +294,266 @@ export class MemoryProviderRepository implements IProviderRepository {
   }
 }
 
-export const providerRepository = new MemoryProviderRepository();
+/**
+ * MongoDB Atlas persistent provider repository with fallback.
+ */
+export class MongoProviderRepository implements IProviderRepository {
+  private fallback = new MemoryProviderRepository();
+  private hasInitialized = false;
+
+  private async getDb() {
+    if (!isMongoConfigured()) return null;
+    try {
+      const db = await getMongoDb();
+      if (!this.hasInitialized) {
+        this.hasInitialized = true;
+        // Seed default providers if collection is empty
+        const count = await db.collection('providers').countDocuments().catch(() => 0);
+        if (count === 0) {
+          await db.collection('providers').insertMany(DEMO_PROVIDERS).catch(() => {});
+        }
+      }
+      return db;
+    } catch {
+      return null;
+    }
+  }
+
+  async findProviders(filters: SearchFilters): Promise<PaginatedResult<Provider>> {
+    const db = await this.getDb();
+    if (!db) return this.fallback.findProviders(filters);
+
+    try {
+      const query: Record<string, unknown> = {};
+
+      if (filters.city && filters.city.trim() !== '') {
+        const cityRegex = new RegExp(filters.city.trim(), 'i');
+        query.$or = [
+          { 'facilities.city': cityRegex },
+          { 'facilities.locality': cityRegex },
+        ];
+      }
+
+      if (filters.locality && filters.locality.trim() !== '') {
+        query['facilities.locality'] = new RegExp(filters.locality.trim(), 'i');
+      }
+
+      if (filters.specialty && filters.specialty.trim() !== '') {
+        query.specialties = new RegExp(filters.specialty.trim(), 'i');
+      }
+
+      if (filters.language && filters.language.trim() !== '') {
+        query.languages = new RegExp(filters.language.trim(), 'i');
+      }
+
+      if (typeof filters.maxFeeMinor === 'number' && filters.maxFeeMinor >= 0) {
+        query['services.amountMinor'] = { $lte: filters.maxFeeMinor };
+      }
+
+      if (filters.providerType) {
+        query.providerType = filters.providerType;
+      }
+
+      if (filters.verificationStatus) {
+        query.verificationStatus = filters.verificationStatus;
+      }
+
+      if (filters.query && filters.query.trim() !== '') {
+        const qRegex = new RegExp(filters.query.trim(), 'i');
+        query.$or = [
+          { displayName: qRegex },
+          { specialties: qRegex },
+          { 'facilities.name': qRegex },
+          { 'facilities.locality': qRegex },
+          { 'facilities.city': qRegex },
+        ];
+      }
+
+      const page = Math.max(1, filters.page || 1);
+      const limit = Math.min(50, Math.max(1, filters.limit || 10));
+      const skip = (page - 1) * limit;
+
+      const [items, total] = await Promise.all([
+        db.collection<Provider>('providers')
+          .find(query, { projection: { privateVerificationRecord: 0 } })
+          .skip(skip)
+          .limit(limit)
+          .toArray(),
+        db.collection('providers').countDocuments(query),
+      ]);
+
+      const totalPages = Math.ceil(total / limit) || 1;
+
+      return {
+        data: items.map((p: Provider) => {
+          const sanitized = { ...p };
+          delete sanitized.privateVerificationRecord;
+          return sanitized;
+        }),
+        meta: {
+          total,
+          page,
+          limit,
+          totalPages,
+          hasMore: page < totalPages,
+        },
+      };
+    } catch {
+      return this.fallback.findProviders(filters);
+    }
+  }
+
+  async getProviderById(id: string, includePrivate = false): Promise<Provider | null> {
+    const db = await this.getDb();
+    if (!db) return this.fallback.getProviderById(id, includePrivate);
+
+    try {
+      const projection = includePrivate ? {} : { privateVerificationRecord: 0 };
+      const provider = await db.collection<Provider>('providers').findOne({ id }, { projection });
+      if (!provider) return this.fallback.getProviderById(id, includePrivate);
+      const copy = { ...provider };
+      if (!includePrivate) {
+        delete copy.privateVerificationRecord;
+      }
+      return copy;
+    } catch {
+      return this.fallback.getProviderById(id, includePrivate);
+    }
+  }
+
+  async createProvider(providerData: Omit<Provider, 'id' | 'createdAt' | 'updatedAt'>): Promise<Provider> {
+    const db = await this.getDb();
+    if (!db) return this.fallback.createProvider(providerData);
+
+    const id = `prov-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const now = new Date().toISOString();
+    const newProvider: Provider = {
+      ...providerData,
+      id,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    try {
+      await db.collection('providers').insertOne({ ...newProvider });
+      return { ...newProvider };
+    } catch {
+      return this.fallback.createProvider(providerData);
+    }
+  }
+
+  async updateProvider(id: string, updates: Partial<Provider>): Promise<Provider | null> {
+    const db = await this.getDb();
+    if (!db) return this.fallback.updateProvider(id, updates);
+
+    try {
+      const now = new Date().toISOString();
+      await db.collection('providers').updateOne({ id }, { $set: { ...updates, updatedAt: now } });
+      return this.getProviderById(id, true);
+    } catch {
+      return this.fallback.updateProvider(id, updates);
+    }
+  }
+
+  async createSubmission(
+    submission: Omit<ProviderSubmission, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<ProviderSubmission> {
+    const db = await this.getDb();
+    if (!db) return this.fallback.createSubmission(submission);
+
+    const id = `sub-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    const now = new Date().toISOString();
+    const newSub: ProviderSubmission = {
+      ...submission,
+      id,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    try {
+      await db.collection('submissions').insertOne({ ...newSub });
+      return { ...newSub };
+    } catch {
+      return this.fallback.createSubmission(submission);
+    }
+  }
+
+  async getSubmissions(status?: SubmissionStatus): Promise<ProviderSubmission[]> {
+    const db = await this.getDb();
+    if (!db) return this.fallback.getSubmissions(status);
+
+    try {
+      const filter = status ? { status } : {};
+      const subs = await db.collection<ProviderSubmission>('submissions').find(filter).toArray();
+      return subs.map((s: ProviderSubmission) => ({ ...s }));
+    } catch {
+      return this.fallback.getSubmissions(status);
+    }
+  }
+
+  async getSubmissionById(id: string): Promise<ProviderSubmission | null> {
+    const db = await this.getDb();
+    if (!db) return this.fallback.getSubmissionById(id);
+
+    try {
+      const sub = await db.collection<ProviderSubmission>('submissions').findOne({ id });
+      return sub ? { ...sub } : this.fallback.getSubmissionById(id);
+    } catch {
+      return this.fallback.getSubmissionById(id);
+    }
+  }
+
+  async updateSubmission(
+    id: string,
+    updates: Partial<ProviderSubmission>
+  ): Promise<ProviderSubmission | null> {
+    const db = await this.getDb();
+    if (!db) return this.fallback.updateSubmission(id, updates);
+
+    try {
+      const now = new Date().toISOString();
+      await db.collection('submissions').updateOne({ id }, { $set: { ...updates, updatedAt: now } });
+      return this.getSubmissionById(id);
+    } catch {
+      return this.fallback.updateSubmission(id, updates);
+    }
+  }
+
+  async getSpecialties(): Promise<string[]> {
+    const db = await this.getDb();
+    if (!db) return this.fallback.getSpecialties();
+    try {
+      const specs = (await db.collection('providers').distinct('specialties')) as string[];
+      return specs.sort();
+    } catch {
+      return this.fallback.getSpecialties();
+    }
+  }
+
+  async getCities(): Promise<string[]> {
+    const db = await this.getDb();
+    if (!db) return this.fallback.getCities();
+    try {
+      const cities = (await db.collection('providers').distinct('facilities.city')) as string[];
+      return cities.sort();
+    } catch {
+      return this.fallback.getCities();
+    }
+  }
+
+  async getLanguages(): Promise<string[]> {
+    const db = await this.getDb();
+    if (!db) return this.fallback.getLanguages();
+    try {
+      const langs = (await db.collection('providers').distinct('languages')) as string[];
+      return langs.sort();
+    } catch {
+      return this.fallback.getLanguages();
+    }
+  }
+}
+
+export const providerRepository: IProviderRepository = isMongoConfigured()
+  ? new MongoProviderRepository()
+  : new MemoryProviderRepository();
+
