@@ -1,8 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Sparkles, Loader2, ArrowRight, X, AlertCircle } from 'lucide-react';
+import {
+  Sparkles,
+  Loader2,
+  ArrowRight,
+  X,
+  AlertCircle,
+  ShieldCheck,
+  PhoneCall,
+  AlertTriangle,
+  Stethoscope,
+} from 'lucide-react';
 import { ValidatedAiSearchIntent } from '@/server/validation/search';
+import { AiSafetyAssessment } from '@/shared/types/multilingual';
 import { formatPaiseToRupees } from '@/shared/utils/formatters';
 
 interface AiSearchBoxProps {
@@ -11,10 +22,10 @@ interface AiSearchBoxProps {
 }
 
 const EXAMPLE_QUERIES = [
-  'Find an English-speaking dermatologist in Kolkata with a consultation fee below ₹1,000',
-  'Pediatrician in Kolkata who speaks Bengali and English',
+  'Find an English-speaking dermatologist in Kolkata with consultation below ₹1,000',
+  'कोलकाता में चमड़ी के विशेषज्ञ डॉक्टर ₹1,000 के अंदर (Hindi)',
+  'কলকাতায় শিশুর ডাক্তার ইংরেজি ও বাংলা বলেন (Bengali)',
   'Cardiology consultation in Kolkata under ₹1,500',
-  'Dental clinic in New Delhi speaking Hindi and English under ₹800',
 ];
 
 export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps) {
@@ -22,6 +33,7 @@ export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps)
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [extractedIntent, setExtractedIntent] = useState<ValidatedAiSearchIntent | null>(null);
+  const [safetyAssessment, setSafetyAssessment] = useState<AiSafetyAssessment | null>(null);
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -31,6 +43,7 @@ export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps)
     setIsLoading(true);
     setError(null);
     setWarningMessage(null);
+    setSafetyAssessment(null);
 
     try {
       const res = await fetch('/api/v1/ai/search-intent', {
@@ -47,58 +60,79 @@ export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps)
 
       const result = json.data;
       setExtractedIntent(result.intent);
+
+      if (result.safety) {
+        setSafetyAssessment(result.safety);
+      }
+
       if (result.warning) {
         setWarningMessage(result.warning);
       }
+
       onFiltersExtracted(result.intent);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'AI interpretation failed. Please use manual filters below.');
+      setError(
+        err instanceof Error ? err.message : 'AI interpretation failed. Please use manual filters below.'
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSelectExample = (query: string) => {
-    setPrompt(query);
+    // Strip trailing language tag if present
+    const cleanQuery = query.replace(/\s*\((?:Hindi|Bengali)\)$/i, '');
+    setPrompt(cleanQuery);
   };
 
   const handleClear = () => {
     setPrompt('');
     setExtractedIntent(null);
+    setSafetyAssessment(null);
     setError(null);
     setWarningMessage(null);
     onClearAi();
   };
 
   return (
-    <div className="bg-gradient-to-br from-teal-50/70 via-white to-slate-50 border border-teal-100 rounded-2xl p-5 shadow-sm">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-teal-600 text-white flex items-center justify-center">
+    <div className="bg-gradient-to-br from-teal-50/70 via-white to-slate-50 border border-teal-100 rounded-3xl p-5 sm:p-6 shadow-xs space-y-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-xs">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-              Natural Language Healthcare Search
-              <span className="text-[11px] font-normal text-teal-700 bg-teal-100/70 px-2 py-0.5 rounded-full">
-                Optional Assistant
+            <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              Natural Language Healthcare Assistant
+              <span className="text-[10px] font-semibold text-teal-800 bg-teal-100/80 px-2 py-0.5 rounded-full">
+                Multilingual (EN • HI • BN)
               </span>
             </h2>
             <p className="text-xs text-slate-500">
-              Describe what you need in plain English. Converts to validated search filters only.
+              Type naturally in English, हिन्दी, or বাংলা. Converts to validated search filters only.
             </p>
           </div>
         </div>
 
-        {extractedIntent && (
-          <button
-            onClick={handleClear}
-            className="text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1 px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 transition-colors"
+        <div className="flex items-center gap-2">
+          <span
+            className="hidden md:inline-flex items-center gap-1 text-[11px] text-slate-500 bg-slate-100/80 px-2 py-1 rounded-lg"
+            title="Personal data (phones, emails, IDs) is scrubbed before processing"
           >
-            <X className="w-3.5 h-3.5" />
-            Clear AI Filter
-          </button>
-        )}
+            <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
+            Privacy Scrubbed
+          </span>
+
+          {extractedIntent && (
+            <button
+              onClick={handleClear}
+              className="text-xs text-slate-600 hover:text-slate-900 flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+              Clear
+            </button>
+          )}
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="relative">
@@ -107,19 +141,20 @@ export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps)
             type="text"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="e.g., Find an English-speaking dermatologist in Kolkata under ₹1,000"
-            className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 bg-white shadow-xs"
+            placeholder="e.g. Find an English-speaking dermatologist in Kolkata under ₹1,000 / কলকাতা বা দিল্লিতে ডাক্তার"
+            className="w-full px-4 py-2.5 text-xs sm:text-sm rounded-2xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 bg-white shadow-xs"
             disabled={isLoading}
+            maxLength={500}
           />
           <button
             type="submit"
             disabled={isLoading || !prompt.trim()}
-            className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2.5 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-xs"
+            className="flex-shrink-0 inline-flex items-center gap-1.5 px-5 py-2.5 bg-teal-600 text-white text-xs sm:text-sm font-semibold rounded-2xl hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-xs"
           >
             {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Interpreting...</span>
+                <span className="hidden sm:inline">Processing...</span>
               </>
             ) : (
               <>
@@ -131,10 +166,56 @@ export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps)
         </div>
       </form>
 
+      {/* Emergency Alert Banner */}
+      {safetyAssessment?.isEmergency && (
+        <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-950 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 animate-pulse">
+          <div className="flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <strong>Acute Medical Emergency Warning:</strong>
+              <p className="text-[11px] text-rose-800 mt-0.5">
+                {safetyAssessment.emergencyGuidance}
+              </p>
+            </div>
+          </div>
+          <a
+            href="tel:112"
+            className="self-start sm:self-center inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-600 text-white font-bold text-xs hover:bg-rose-700 transition-colors flex-shrink-0 shadow-xs"
+          >
+            <PhoneCall className="w-3.5 h-3.5" /> Call 112 (India)
+          </a>
+        </div>
+      )}
+
+      {/* Clinical Advice Blocked Disclaimer */}
+      {safetyAssessment?.isClinicalAdviceBlocked && (
+        <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1.5">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <strong>Non-Clinical Scope Notice:</strong>
+              <p className="text-[11px] text-amber-800 mt-0.5">
+                {safetyAssessment.blockedAdviceExplanation}
+              </p>
+            </div>
+          </div>
+          {safetyAssessment.recommendedSpecialty && (
+            <div className="pt-1 flex items-center gap-1.5 text-[11px] font-medium text-teal-800">
+              <Stethoscope className="w-3.5 h-3.5 text-teal-600" />
+              <span>
+                Recommended in-person specialty:{' '}
+                <strong>{safetyAssessment.recommendedSpecialty}</strong>
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Example Suggestions */}
       {!extractedIntent && (
-        <div className="mt-3">
+        <div>
           <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider block mb-1.5">
-            Try asking:
+            Try asking in any language:
           </span>
           <div className="flex flex-wrap gap-1.5">
             {EXAMPLE_QUERIES.map((example, idx) => (
@@ -142,7 +223,7 @@ export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps)
                 key={idx}
                 type="button"
                 onClick={() => handleSelectExample(example)}
-                className="text-xs text-slate-600 bg-white border border-slate-200 hover:border-teal-300 hover:text-teal-700 px-2.5 py-1 rounded-lg transition-colors text-left"
+                className="text-xs text-slate-600 bg-white border border-slate-200 hover:border-teal-300 hover:text-teal-700 px-3 py-1 rounded-xl transition-colors text-left"
               >
                 &ldquo;{example}&rdquo;
               </button>
@@ -151,10 +232,11 @@ export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps)
         </div>
       )}
 
+      {/* Extracted Intent Filter Chips */}
       {extractedIntent && (
-        <div className="mt-4 pt-3 border-t border-teal-100">
-          <span className="text-xs font-medium text-slate-700 block mb-2">
-            Interpreted Search Filters (Passed to Trusted Provider Search):
+        <div className="pt-2 border-t border-teal-100 space-y-1.5">
+          <span className="text-xs font-semibold text-slate-700 block">
+            Validated Search Filters Extracted:
           </span>
           <div className="flex flex-wrap gap-2">
             {extractedIntent.location && (
@@ -181,15 +263,17 @@ export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps)
         </div>
       )}
 
+      {/* Warning Message */}
       {warningMessage && (
-        <div className="mt-3 flex items-start gap-2 p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs">
+        <div className="flex items-start gap-2 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs">
           <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-600" />
           <span>{warningMessage}</span>
         </div>
       )}
 
+      {/* Error Message */}
       {error && (
-        <div className="mt-3 flex items-start gap-2 p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs">
+        <div className="flex items-start gap-2 p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs">
           <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-rose-600" />
           <span>{error}</span>
         </div>
@@ -197,4 +281,3 @@ export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps)
     </div>
   );
 }
-

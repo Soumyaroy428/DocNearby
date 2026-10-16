@@ -39,3 +39,4 @@ export const unifiedSearchQuerySchema = z.object({
 });
 
 export type ValidatedUnifiedSearchParams = z.infer<typeof unifiedSearchQuerySchema>;
+

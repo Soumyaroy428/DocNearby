@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { HeartPulse, AlertCircle, Search, ShieldCheck, User, Stethoscope, ShieldAlert, Scale, Calendar, Compass } from 'lucide-react';
 import { UserPublicProfile } from '@/shared/types/auth';
+import { LanguageSelector } from '@/client/components/multilingual/LanguageSelector';
 
 export function Header() {
   const [user, setUser] = useState<UserPublicProfile | null>(null);
@@ -100,6 +101,9 @@ export function Header() {
                 </Link>
               </div>
             )}
+
+            {/* Language Selector & Medical Phrasebook */}
+            <LanguageSelector />
 
             {user ? (
               <div className="flex items-center gap-2">

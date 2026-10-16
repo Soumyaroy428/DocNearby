@@ -406,6 +406,46 @@ Baseline repository audit (CC-00) completed on 2026-10-15. The repository is a *
 
 ---
 
+## Checkpoint CC-07 Evidence Log (Completed 2026-10-16)
+
+### 1. Implemented Capabilities
+- **Provider-Independent AI Architecture (`server/ai/adapters/`):**
+  - `IAiLanguageModelAdapter` interface with generic structured generation (`generateStructured<T>`).
+  - `GeminiAiAdapter`: Integrates with Google Gemini 1.5 Flash using JSON schemas and 8000ms timeout limits.
+  - `HeuristicAiAdapter`: Deterministic offline intent extractor supporting English, Devanagari Hindi, and Bengali script. Converts Indic numerals (`০-৯`, `०-९`) into ASCII integers and maps natural language budget phrases (`under ₹1,000`, `1000 रुपये के अंदर`, `৫০০ টাকার মধ্যে`) to exact integer minor units (paise).
+  - `MockAiAdapter`: Deterministic test mock for CI environments.
+  - `AiProviderManager`: Orchestrates transparent fallback from Gemini to local heuristic parsing with zero service disruption.
+- **Healthcare Safety Guardrails (`server/ai/safety-guardrails.ts`):**
+  - Immediate emergency symptom detection triggering high-priority emergency guidance ("Call 112 or 102 immediately").
+  - Absolute prohibition of automated clinical diagnosis, prescription writing, or drug dosage recommendations.
+  - Non-clinical symptom-to-specialty routing (e.g., skin rashes -> Dermatology, toothache -> Dentistry).
+- **Privacy Minimization & PII Scrubber (`server/ai/privacy-scrubber.ts`):**
+  - Automatic regex-based redaction of email addresses, 10–12 digit Indian/international mobile numbers, credit/debit card numbers, and Indian national IDs (Aadhaar, PAN) before queries reach external AI models.
+- **Abuse Prevention & Rate Limiting (`server/ai/rate-limiter.ts`, `server/validation/ai-multilingual.ts`):**
+  - Sliding-window in-memory rate limiter enforcing a 10 requests/minute limit per client.
+  - Strict 500-character input capping via Zod schema validation.
+- **Travel Health Communication Phrasebook (`server/services/multilingual-service.ts`, `client/components/multilingual/TravelerPhrasebookModal.tsx`):**
+  - Curated trilingual phrases (English, Hindi, Bengali with pronunciation transliterations) across Emergency, Consultation, Pricing & Insurance, Directions, and Pharmacy.
+  - Audio pronunciation helper via Web Speech Synthesis and one-click clipboard copying.
+- **Client & Navigation Integration:**
+  - `LanguageSelector.tsx` integrated in global header (`Header.tsx`).
+  - `AiSearchBox.tsx` enhanced with multilingual example queries, red emergency alert banners, clinical disclaimer banners, and privacy indicators.
+- **API Endpoints:**
+  - `POST /api/v1/ai/multilingual-assist`: Full natural language assistance, emergency assessment, and travel phrase matching.
+  - `GET /api/v1/ai/phrasebook`: Categorized travel medical phrase retrieval.
+  - `POST /api/v1/ai/search-intent`: Search filter extraction backed by `AiProviderManager`.
+
+### 2. Actual Test & Build Results
+- **Vitest Unit/Integration Tests (`npm test`):**
+  - `tests/ai-multilingual-assistance.test.ts` (18 tests) — PASSED
+  - All 11 test suites passed: **125/125 tests passed** (100% passing).
+- **TypeScript Strict Check (`npm run typecheck`):**
+  - Zero errors reported (`tsc --noEmit` clean exit code 0).
+- **Next.js Production Build (`npm run build`):**
+  - Compiled successfully; **28 static and dynamic routes** generated cleanly including `/api/v1/ai/multilingual-assist` and `/api/v1/ai/phrasebook`.
+
+---
+
 ## Required evidence for each update
 Record:
 - Date and checkpoint
@@ -418,5 +458,6 @@ Record:
 - Deployment/push authorization if relevant
 
 Never mark a feature `VERIFIED` based solely on code generation or an AI agent's assertion.
+
 
 

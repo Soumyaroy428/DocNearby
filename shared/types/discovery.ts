@@ -135,3 +135,4 @@ export interface UnifiedSearchResponse {
   data: UnifiedHealthcareListing[];
   meta: UnifiedSearchMeta;
 }
+

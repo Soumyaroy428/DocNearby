@@ -50,3 +50,4 @@ export async function handleGetUnifiedSearch(request: NextRequest) {
     );
   }
 }
+

@@ -73,12 +73,12 @@
 - [x] Documentation and completion report; stop and wait for review.
 
 ## CC-07 — AI and multilingual assistance
-- [ ] Provider-independent AI adapter.
-- [ ] Structured output validation and safe fallback.
-- [ ] Language selection/translation assistance.
-- [ ] Privacy minimization and rate limits.
-- [ ] Safety testing; no diagnosis/prescription.
-- [ ] Report and wait.
+- [x] Provider-independent AI adapter.
+- [x] Structured output validation and safe fallback.
+- [x] Language selection/translation assistance.
+- [x] Privacy minimization and rate limits.
+- [x] Safety testing; no diagnosis/prescription.
+- [x] Report and wait.
 
 ## CC-08 — Reviews and trust
 - [ ] Review submission and moderation.
