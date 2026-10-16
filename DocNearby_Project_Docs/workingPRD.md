@@ -183,6 +183,36 @@ Baseline repository audit (CC-00) completed on 2026-10-15. The repository is a *
 
 ---
 
+## Unified Client/Server Architecture Reorganization (Completed 2026-10-16)
+
+### 1. Structural Reorganization Details
+- **`client/` (Frontend Layer):**
+  - `client/components/layout/`: `Header.tsx`, `Footer.tsx`
+  - `client/components/providers/`: `ProviderCard.tsx`, `ProviderDetailsView.tsx`, `SaveProviderButton.tsx`
+  - `client/components/search/`: `AiSearchBox.tsx`, `FilterBar.tsx`
+  - `client/views/`: `HomePageView.tsx`, `LoginPageView.tsx`, `RegisterPageView.tsx`, `AccountPageView.tsx`, `ProviderNotFoundView.tsx`
+- **`server/` (Backend Layer):**
+  - `server/api/`: Reusable, testable Route Handler implementations (`providers.ts`, `provider-details.ts`, `metadata.ts`, `ai-search-intent.ts`, `auth-login.ts`, `auth-logout.ts`, `auth-me.ts`, `auth-register.ts`, `user-profile.ts`, `user-saved-providers.ts`)
+  - `server/auth/`: Cryptographic hashing, timing-safe equality, token signing (`security.ts`), session resolution (`get-session.ts`)
+  - `server/data/`: Demonstration mock dataset (`mock-providers.ts`)
+  - `server/repositories/`: Data access layer with object-level authorization (`provider-repository.ts`, `user-repository.ts`)
+  - `server/services/`: Domain business logic (`provider-service.ts`, `ai-search-service.ts`, `auth-service.ts`)
+  - `server/validation/`: Zod schemas for query parameters, auth inputs, and AI search intent (`search.ts`, `auth.ts`)
+- **`shared/` (Shared Types & Utilities):**
+  - `shared/types/`: Domain types (`provider.ts`, `auth.ts`)
+  - `shared/utils/`: Formatting and badge utilities (`formatters.ts`)
+- **`app/` (Next.js Thin Routing Entrypoints):**
+  - All page and API routes act as lightweight adapters delegating directly to `@/client/views` and `@/server/api`, preserving 100% Next.js App Router route hierarchy and zero-CORS full-stack deployment.
+- **Superseded Directories Removed:**
+  - `components/` and `lib/` safely deleted with all code migrated.
+
+### 2. Actual Test & Build Verification Results
+- **TypeScript Strict Check (`npm run typecheck`):** Passed with 0 errors.
+- **Vitest Unit/Integration Tests (`npm test`):** 34 tests passed across 5 test suites (100% passing).
+- **Next.js Production Build (`npm run build`):** 16 routes compiled successfully without warnings or errors.
+
+---
+
 ## Required evidence for each update
 Record:
 - Date and checkpoint
@@ -195,3 +225,4 @@ Record:
 - Deployment/push authorization if relevant
 
 Never mark a feature `VERIFIED` based solely on code generation or an AI agent's assertion.
+

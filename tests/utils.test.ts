@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatPaiseToRupees, formatDate, getVerificationBadge, getPriceTypeBadge } from '@/lib/utils';
+import { formatPaiseToRupees, formatDate, getVerificationBadge, getPriceTypeBadge } from '@/shared/utils/formatters';
 
 describe('Utility & Formatting Functions', () => {
   it('formats integer paise into Indian Rupee strings accurately', () => {
@@ -37,4 +37,3 @@ describe('Utility & Formatting Functions', () => {
     expect(estimate.label).toBe('Estimated Price');
   });
 });
-

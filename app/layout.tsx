@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
+import { Header } from '@/client/components/layout/Header';
+import { Footer } from '@/client/components/layout/Footer';
 
 export const metadata: Metadata = {
   title: 'DocNearby — Trusted Healthcare Discovery for Travelers',
@@ -23,4 +23,3 @@ export default function RootLayout({
     </html>
   );
 }
-

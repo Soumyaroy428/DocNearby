@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { AuthService } from '@/lib/services/auth-service';
-import { MemoryUserRepository } from '@/lib/repositories/user-repository';
+import { AuthService } from '@/server/services/auth-service';
+import { MemoryUserRepository } from '@/server/repositories/user-repository';
 
 describe('Object-Level Authorization & Private Records Isolation', () => {
   const repo = new MemoryUserRepository();
@@ -65,4 +65,3 @@ describe('Object-Level Authorization & Private Records Isolation', () => {
     expect(bobRecordsAfter.length).toBe(0);
   });
 });
-

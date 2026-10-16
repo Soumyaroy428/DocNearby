@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { ProviderService } from '@/lib/services/provider-service';
-import { MemoryProviderRepository } from '@/lib/repositories/provider-repository';
+import { ProviderService } from '@/server/services/provider-service';
+import { MemoryProviderRepository } from '@/server/repositories/provider-repository';
 import { ZodError } from 'zod';
 
 describe('ProviderService & Search Filtering', () => {
@@ -105,4 +105,3 @@ describe('ProviderService & Search Filtering', () => {
     expect(result.meta.limit).toBe(2);
   });
 });
-

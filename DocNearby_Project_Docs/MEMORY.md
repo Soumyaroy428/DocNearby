@@ -39,7 +39,9 @@ This file records durable project decisions. Update it only when a decision is c
 - `CC-00 — Repository Audit and Baseline`: VERIFIED.
 - `CC-01 — Simple Manual + AI Healthcare Discovery`: VERIFIED and deployed.
 - `CC-02 — Authentication and Authorization`: VERIFIED (Registration, login, sessions, roles, saved providers, object-level isolation; 34 passing tests).
+- `Unified Client/Server Architecture Reorganization`: VERIFIED (Full separation into `client/` for frontend components/views and `server/` for backend services/repositories/API handlers/auth, `shared/` for types/utilities, with thin routing in `app/`).
 - Implementation state: Fully verified and awaiting user review before CC-03.
+
 
 ## Update policy
 When a decision changes, record date, decision, reason, and affected documents. Never rewrite an unverified assumption as a confirmed fact.

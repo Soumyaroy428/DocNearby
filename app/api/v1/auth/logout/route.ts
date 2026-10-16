@@ -1,21 +1,3 @@
-import { NextResponse } from 'next/server';
-import { SESSION_COOKIE_NAME } from '@/lib/auth/get-session';
+import { handlePostLogout } from '@/server/api/auth-logout';
 
-export async function POST() {
-  const response = NextResponse.json({
-    data: { success: true },
-    error: null,
-  });
-
-  // Clear session cookie
-  response.cookies.set({
-    name: SESSION_COOKIE_NAME,
-    value: '',
-    httpOnly: true,
-    expires: new Date(0),
-    path: '/',
-  });
-
-  return response;
-}
-
+export const POST = handlePostLogout;

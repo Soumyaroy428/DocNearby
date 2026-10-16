@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { hashPassword, verifyPassword, signSessionToken, verifySessionToken } from '@/lib/auth/security';
-import { AuthService } from '@/lib/services/auth-service';
-import { MemoryUserRepository } from '@/lib/repositories/user-repository';
+import { hashPassword, verifyPassword, signSessionToken, verifySessionToken } from '@/server/auth/security';
+import { AuthService } from '@/server/services/auth-service';
+import { MemoryUserRepository } from '@/server/repositories/user-repository';
 
 describe('Auth Security & Password Hashing', () => {
   it('hashes password and verifies successfully with correct password', async () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { AiSearchService } from '@/lib/services/ai-search-service';
-import { aiSearchIntentSchema } from '@/lib/validation/search';
+import { AiSearchService } from '@/server/services/ai-search-service';
+import { aiSearchIntentSchema } from '@/server/validation/search';
 
 describe('AiSearchService & Intent Extraction', () => {
   const aiService = new AiSearchService();
@@ -53,4 +53,3 @@ describe('AiSearchService & Intent Extraction', () => {
     expect(parsed.success).toBe(false);
   });
 });
-
