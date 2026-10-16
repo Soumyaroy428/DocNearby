@@ -262,3 +262,4 @@ export const DEMO_PROVIDERS: Provider[] = [
     updatedAt: '2026-06-10T00:00:00Z'
   }
 ];
+

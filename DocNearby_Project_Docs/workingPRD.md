@@ -213,6 +213,46 @@ Baseline repository audit (CC-00) completed on 2026-10-15. The repository is a *
 
 ---
 
+## Checkpoint CC-03 Evidence Log (Completed 2026-10-16)
+
+### 1. Implemented Capabilities
+- **Provider & Statutory Verification Data Model (`shared/types/provider.ts`):**
+  - Expanded `Provider` model with facilities, services, public contact, `verificationStatus` (`verified`, `verification_pending`, `unverified`, `suspended`), `verificationSummary`, and `verificationDetail`.
+  - Added confidential `PrivateVerificationRecord` storing internal audit notes, license numbers, document storage references, reviewer user ID, and review timestamps.
+  - Added `ProviderSubmission` model capturing applicant identity, role, facility details, registration references, and review state (`pending_review`, `approved`, `rejected`, `requires_correction`).
+  - Added `AdminVerificationAction` for audit-logged approvals, corrections, and rejections.
+- **Strict Public vs. Private Field Separation:**
+  - Implemented automatic sanitization in `server/repositories/provider-repository.ts` and `server/services/provider-service.ts`.
+  - `findProviders()` and default `getProviderById(id, includePrivate = false)` strictly strip out `privateVerificationRecord` from all public API and UI responses.
+  - Confidential audit notes and internal investigator references are accessible only in authenticated administrative contexts.
+- **Provider Onboarding Submission (`server/validation/provider-application.ts`, `server/api/provider-apply.ts`):**
+  - Zod validation for applicant identity, practice details, medical council registration number, issuing authority, spoken languages, and consultation fees.
+  - User-facing application portal (`client/views/ProviderApplyPageView.tsx`, `app/providers/apply/page.tsx`) with real-time feedback and review notices.
+- **Admin Review & Evidence Governance (`server/api/admin-submissions.ts`, `server/api/admin-review-submission.ts`):**
+  - Restricted to users with `role: 'admin'` (RBAC enforced).
+  - Admin verification dashboard (`client/views/AdminVerificationPageView.tsx`, `app/admin/verification/page.tsx`) allowing Trust Operations personnel to audit credentials, log what was checked in the official register, and approve, request corrections, or reject.
+  - Approval automatically publishes the active provider into the public directory with an authentic verified badge.
+- **Suspension and Reinstatement Governance (`server/api/admin-suspend-provider.ts`):**
+  - Provides administrators the capability to immediately suspend disputed or flagged listings with recorded reasons, and reinstate upon confirmed re-verification.
+- **Navigation Enhancements (`client/components/layout/Header.tsx`):**
+  - Added "List Practice" quick link and dynamic "Admin Review" portal link for authenticated administrators.
+
+### 2. Actual Test & Build Results
+- **Vitest Unit/Integration Tests (`npm test`):**
+  - `tests/provider-verification.test.ts` (8 tests) — PASSED (Verifies application validation, approval into public directory, strict public/private field omission, rejection audit logs, and suspension/reinstatement lifecycle).
+  - `tests/auth-service.test.ts` (9 tests) — PASSED
+  - `tests/object-level-auth.test.ts` (6 tests) — PASSED
+  - `tests/provider-service.test.ts` (11 tests) — PASSED
+  - `tests/ai-search-service.test.ts` (4 tests) — PASSED
+  - `tests/utils.test.ts` (4 tests) — PASSED
+  - **Total:** 42 passed across 6 test suites in 3.07s (100% passing).
+- **TypeScript Strict Check (`npm run typecheck`):**
+  - Zero errors reported (`tsc --noEmit` exited with code 0).
+- **Next.js Production Build (`npm run build`):**
+  - Compiled successfully; 20 static and dynamic routes generated including all new provider application and admin verification endpoints.
+
+---
+
 ## Required evidence for each update
 Record:
 - Date and checkpoint
@@ -225,4 +265,5 @@ Record:
 - Deployment/push authorization if relevant
 
 Never mark a feature `VERIFIED` based solely on code generation or an AI agent's assertion.
+
 

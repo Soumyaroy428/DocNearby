@@ -326,3 +326,4 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
     </div>
   );
 }
+

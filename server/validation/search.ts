@@ -31,3 +31,4 @@ export const aiSearchRequestSchema = z.object({
 });
 
 export type AiSearchRequest = z.infer<typeof aiSearchRequestSchema>;
+

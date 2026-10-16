@@ -28,12 +28,12 @@
 - [x] Report and wait.
 
 ## CC-03 — Provider directory and verification
-- [ ] Provider/facility/service data model and validation.
-- [ ] Provider submission flow.
-- [ ] Admin review and evidence records.
-- [ ] Re-verification, correction, and suspension flow.
-- [ ] Public/private field separation.
-- [ ] Report and wait.
+- [x] Provider/facility/service data model and validation.
+- [x] Provider submission flow.
+- [x] Admin review and evidence records.
+- [x] Re-verification, correction, and suspension flow.
+- [x] Public/private field separation.
+- [x] Report and wait.
 
 ## CC-04 — Maps and location
 - [ ] Select mapping provider after licensing/cost review.

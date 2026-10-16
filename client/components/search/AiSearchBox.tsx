@@ -197,3 +197,4 @@ export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps)
     </div>
   );
 }
+

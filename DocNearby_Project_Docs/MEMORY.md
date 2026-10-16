@@ -38,9 +38,10 @@ This file records durable project decisions. Update it only when a decision is c
 ## Current checkpoint
 - `CC-00 — Repository Audit and Baseline`: VERIFIED.
 - `CC-01 — Simple Manual + AI Healthcare Discovery`: VERIFIED and deployed.
-- `CC-02 — Authentication and Authorization`: VERIFIED (Registration, login, sessions, roles, saved providers, object-level isolation; 34 passing tests).
-- `Unified Client/Server Architecture Reorganization`: VERIFIED (Full separation into `client/` for frontend components/views and `server/` for backend services/repositories/API handlers/auth, `shared/` for types/utilities, with thin routing in `app/`).
-- Implementation state: Fully verified and awaiting user review before CC-03.
+- `CC-02 — Authentication and Authorization`: VERIFIED (Registration, login, sessions, roles, saved providers, object-level isolation).
+- `Unified Client/Server Architecture Reorganization`: VERIFIED (Clean separation into `client/`, `server/`, `shared/`, `app/`).
+- `CC-03 — Provider Directory and Verification`: VERIFIED (Provider application onboarding, admin verification governance, evidence records, suspension/reinstatement lifecycle, strict public vs. private field isolation; 42 passing tests).
+- Implementation state: Fully verified and awaiting user review before CC-04.
 
 
 ## Update policy

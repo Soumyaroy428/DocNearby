@@ -28,3 +28,4 @@ export async function getSessionUser(request?: NextRequest): Promise<UserPublicP
 
   return authService.getSessionUser(token);
 }
+

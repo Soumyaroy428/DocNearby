@@ -41,6 +41,20 @@ export interface VerificationRecord {
   whatWasChecked: string;
 }
 
+/**
+ * Confidential verification details stored strictly server-side.
+ * MUST NEVER be returned in public search or public provider profile APIs.
+ */
+export interface PrivateVerificationRecord {
+  internalNotes?: string;
+  documentStorageRef?: string;
+  authorityName?: string;
+  licenseRegistrationNumber: string;
+  reviewedByUserId: string;
+  reviewedAt: string;
+  recheckScheduledAt?: string;
+}
+
 export interface Provider {
   id: string;
   displayName: string;
@@ -63,6 +77,52 @@ export interface Provider {
   isDemonstration: boolean; // Explicit flag for demo records
   createdAt: string;
   updatedAt: string;
+  /** Private internal verification record (sanitized out in public endpoints) */
+  privateVerificationRecord?: PrivateVerificationRecord;
+}
+
+export type SubmissionStatus = 'pending_review' | 'approved' | 'rejected' | 'requires_correction';
+
+export interface ProviderSubmission {
+  id: string;
+  submittedByUserId: string;
+  applicantName: string;
+  applicantEmail: string;
+  applicantRole: string;
+  displayName: string;
+  providerType: ProviderType;
+  specialties: string[];
+  languages: string[];
+  qualifications: string[];
+  experienceYears?: number;
+  registrationReference: string;
+  authorityName: string;
+  documentStorageRef?: string;
+  locality: string;
+  city: string;
+  state?: string;
+  country: string;
+  consultationFeeMinor: number;
+  publicPhone: string;
+  publicEmail?: string;
+  publicWebsite?: string;
+  status: SubmissionStatus;
+  reviewNotes?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  createdProviderId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type VerificationDecision = 'approved' | 'rejected' | 'requires_correction' | 'suspended';
+
+export interface AdminVerificationAction {
+  decision: VerificationDecision;
+  evidenceType: string;
+  whatWasChecked: string;
+  reviewNotes: string;
+  expiresAt?: string;
 }
 
 export interface SearchFilters {

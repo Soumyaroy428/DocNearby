@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { HeartPulse, AlertCircle, Search, ShieldCheck, User } from 'lucide-react';
+import { HeartPulse, AlertCircle, Search, ShieldCheck, User, Stethoscope, ShieldAlert } from 'lucide-react';
 import { UserPublicProfile } from '@/shared/types/auth';
 
 export function Header() {
@@ -54,22 +54,32 @@ export function Header() {
           </Link>
 
           {/* Navigation Links */}
-          <nav className="flex items-center gap-3 sm:gap-4 text-sm font-medium text-slate-700">
+          <nav className="flex items-center gap-2 sm:gap-3 text-sm font-medium text-slate-700">
             <Link
               href="/"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:text-teal-700 hover:bg-slate-100 transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md hover:text-teal-700 hover:bg-slate-100 transition-colors"
             >
               <Search className="w-4 h-4 text-slate-500" />
               <span>Find Care</span>
             </Link>
 
             <Link
-              href="/#verification-policy"
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:text-teal-700 hover:bg-slate-100 transition-colors"
+              href="/providers/apply"
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-slate-600 hover:text-teal-700 hover:bg-slate-100 transition-colors text-xs"
             >
-              <ShieldCheck className="w-4 h-4 text-slate-500" />
-              <span>Standards</span>
+              <Stethoscope className="w-3.5 h-3.5 text-teal-600" />
+              <span>List Practice</span>
             </Link>
+
+            {user?.role === 'admin' && (
+              <Link
+                href="/admin/verification"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 text-xs font-semibold transition-colors"
+              >
+                <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
+                <span>Admin Review</span>
+              </Link>
+            )}
 
             {user ? (
               <div className="flex items-center gap-2">

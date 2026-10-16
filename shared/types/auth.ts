@@ -42,3 +42,4 @@ export interface SessionPayload {
   role: UserRole;
   exp: number;
 }
+

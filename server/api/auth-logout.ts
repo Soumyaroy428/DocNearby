@@ -17,3 +17,4 @@ export async function handlePostLogout() {
 
   return response;
 }
+

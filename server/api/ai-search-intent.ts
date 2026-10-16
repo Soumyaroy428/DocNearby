@@ -41,3 +41,4 @@ export async function handlePostAiSearchIntent(request: NextRequest) {
     );
   }
 }
+

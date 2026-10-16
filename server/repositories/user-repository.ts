@@ -164,3 +164,4 @@ export class MemoryUserRepository implements IUserRepository {
 }
 
 export const userRepository = new MemoryUserRepository();
+
