@@ -20,13 +20,14 @@ Baseline repository audit (CC-00) completed on 2026-10-15. The repository is a *
 | CC-00 | Repository audit and baseline | VERIFIED | Read-only audit completed; 10 docs inspected; environment verified (Node v22.21.0, npm 11.12.1, git 2.51.2). Documented in CC-00 report. |
 | CC-01 | Manual search + optional AI filter extraction | VERIFIED | Scaffolding complete; public discovery search page, AI search intent box, manual filters, provider cards, provider details page, demo datasets with clear labels, and Next.js route handlers implemented. 19 unit/integration tests passed; production build passed. |
 | CC-02 | Authentication and authorization | VERIFIED | Implemented registration, scrypt password hashing, HMAC session tokens, user roles (traveler/provider/admin), saved providers, profile updates, and strict object-level isolation. 34 tests passing; production build verified. |
-| CC-03 | Provider directory and verification | NOT STARTED | Awaiting CC-02 user review and approval before starting. |
-| CC-04 | Maps and location | NOT STARTED | Awaiting preceding checkpoints. |
-| CC-05 | Transparent pricing | NOT STARTED | Awaiting preceding checkpoints. |
-| CC-06 | Appointments and notifications | NOT STARTED | Awaiting preceding checkpoints. |
-| CC-07 | AI and multilingual assistance | NOT STARTED | Awaiting preceding checkpoints. |
-| CC-08 | Reviews and trust | NOT STARTED | Awaiting preceding checkpoints. |
-| CC-09 | Security, deployment, pilot | NOT STARTED | Requires complete implementation, security, legal, and production review. |
+| CC-03 | Provider directory and verification | VERIFIED | Provider models, submission flow, admin verification, suspension, re-verification. 8 tests passing. |
+| CC-04 | Maps and location | VERIFIED | Geospatial coordinates, Haversine nearby search, radius filters, OpenStreetMap / directions. 13 tests passing. |
+| CC-05 | Transparent pricing | VERIFIED | Price transparency, freshness labels, currency minor units, user price reporting. 21 tests passing. |
+| CC-06 | Appointments and notifications | VERIFIED | Appointment requests, status lifecycle, retry-safe notifications, cancellation rules. 14 tests passing. |
+| Maps-Places | Google Places healthcare discovery | VERIFIED | Official Places adapter, caching, unified search, strict source attribution, invariant protection. 17 tests passing. |
+| CC-07 | AI and multilingual assistance | VERIFIED | Provider-independent AI adapter, Hindi/Bengali heuristic fallback, PII scrubber, phrasebook, safety guardrails. 18 tests passing. |
+| CC-08 | Reviews and trust | VERIFIED | Patient reviews, verified patient badges, anti-abuse controls, provider responses, correction reports. 16 tests passing. |
+| CC-09 | Production readiness and pilot | VERIFIED | Security headers, health monitoring, legal compliance (/privacy, /terms, /contact), DPDP Act, runbook, Kolkata pilot. 145/145 tests passing. |
 
 ---
 
@@ -480,6 +481,42 @@ Baseline repository audit (CC-00) completed on 2026-10-15. The repository is a *
   - Zero errors reported (`tsc --noEmit` clean exit code 0).
 - **Next.js Production Build (`npm run build`):**
   - Compiled successfully; **31 static and dynamic routes** generated cleanly including `/admin/reviews` and all review/correction API endpoints.
+
+---
+
+## Checkpoint CC-09 Evidence Log (Completed 2026-10-16)
+
+### 1. Implemented Capabilities
+- **Security Hardening & Production HTTP Headers (`next.config.mjs`):**
+  - Strict-Transport-Security (HSTS): 2-year duration (`max-age=63072000; includeSubDomains; preload`).
+  - X-Frame-Options: `SAMEORIGIN` (prevents clickjacking).
+  - X-Content-Type-Options: `nosniff` (prevents MIME sniffing).
+  - Referrer-Policy: `strict-origin-when-cross-origin`.
+  - Permissions-Policy: Restricted camera and microphone; scoped geolocation.
+  - `poweredByHeader: false` suppresses the `x-powered-by: Next.js` fingerprint.
+- **System Observability & Monitoring (`app/api/v1/health/route.ts`, `server/api/health.ts`):**
+  - High-availability health check reporting database connection status (MongoDB Atlas vs in-memory fallback).
+  - Runtime metrics: Node version, system uptime in seconds, memory usage (RSS, Heap Total, Heap Used in MB).
+  - External API readiness indicators: Google Places API and Gemini AI integration status.
+  - Pilot operational metadata: Kolkata, India active status and covered zones.
+- **Statutory Legal Compliance & Public Policies:**
+  - Dedicated Privacy Policy (`/privacy`, `client/views/PrivacyPolicyPageView.tsx`): Aligned with India's *Digital Personal Data Protection Act, 2023 (DPDP Act)* and GDPR; data minimization commitment; zero data selling / monetization guarantee; automated PII scrubbing (Aadhaar, PAN, phone numbers, emails).
+  - Terms of Service & Medical Disclaimer (`/terms`, `client/views/TermsPageView.tsx`): Statutory non-clinical disclaimer (DocNearby is an independent discovery platform, not a hospital/clinic/emergency service); emergency helpline instructions (112/102 in India); discovery source separation (Google Places vs DocNearby registered); transparent pricing guidelines.
+  - Grievance Redressal & Support (`/contact`, `client/views/ContactPageView.tsx`): Statutory Grievance Redressal Officer designation (`grievance@docnearby.com`) with 48h acknowledgment and 30d resolution SLA; interactive support and clinic correction dispatch form.
+  - Global Footer (`client/components/layout/Footer.tsx`): Direct navigation links to Privacy, Terms, Contact, Discovery, and emergency helpline notice.
+- **Operational Runbooks & Incident Management:**
+  - `INCIDENT_RESPONSE_AND_BACKUP_PLAN.md`: Severity level classifications (Sev 1–3), MongoDB Atlas daily snapshot and PITR restore procedures, secret rotation protocol, and external API outage fallbacks.
+  - `PILOT_READINESS_AND_METRICS_REPORT.md`: Kolkata single-city pilot cluster definitions (Park Street, Salt Lake Sector V, New Town, Ballygunge), baseline quality metrics, and operational readiness sign-off.
+- **Automated Smoke Test Suite (`tests/production-readiness-smoke.test.ts`):**
+  - Health check endpoint verification, security headers inspection, PII scrubbing verification, and booking invariant enforcement.
+
+### 2. Actual Test & Build Results
+- **Vitest Unit/Integration Tests (`npm test`):**
+  - All 13 test suites passed: **145/145 tests passed** (100% passing).
+- **TypeScript Strict Check (`npm run typecheck`):**
+  - Clean compilation with 0 errors (`tsc --noEmit` exit code 0).
+- **Next.js Production Build (`npm run build`):**
+  - Compiled successfully; **35 static and dynamic routes** generated cleanly including `/api/v1/health`, `/privacy`, `/terms`, `/contact`.
 
 ---
 
