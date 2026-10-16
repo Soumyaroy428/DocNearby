@@ -331,6 +331,42 @@ Baseline repository audit (CC-00) completed on 2026-10-15. The repository is a *
 
 ---
 
+## Checkpoint CC-06 Evidence Log (Completed 2026-10-16)
+
+### 1. Implemented Capabilities
+- **Appointment Request & Confirmation State Machine (`shared/types/appointment.ts`, `shared/utils/formatters.ts`):**
+  - Seven-state lifecycle: `requested`, `confirmed`, `rescheduled`, `cancelled_by_patient`, `cancelled_by_provider`, `completed`, `no_show`.
+  - Initial state invariant: all booking requests enter `requested` status; never auto-confirmed upon creation.
+  - Distinct status badges via `getAppointmentStatusBadge()`, visually distinguishing unconfirmed requests (sky-blue) from official provider confirmations (emerald).
+- **Validation Schemas (`server/validation/appointment.ts`):**
+  - `createAppointmentSchema` enforcing future booking dates, valid email, phone, and optional patient intake notes.
+  - `updateAppointmentStatusSchema` and `rescheduleAppointmentSchema` enforcing transition rules and required reasons.
+- **Retry-Safe Idempotent Notifications (`server/services/notification-service.ts`):**
+  - Generates deterministic idempotency keys (`notif-${appointmentId}-${eventType}-v${attempt}`) preventing duplicate email/SMS dispatch.
+  - Copy clearly communicates status (e.g. `[REQUEST SUBMITTED] (Pending Confirmation)` vs `[CONFIRMED]`).
+- **Object-Level Authorization & Service (`server/services/appointment-service.ts`):**
+  - Patients can only view and cancel their own appointments (`403 Forbidden` on unauthorized access).
+  - Providers and administrators can confirm, decline, or complete appointments.
+  - Mutation of terminal states (`cancelled`, `completed`, `no_show`) is strictly blocked.
+- **Repository Layer (`server/repositories/appointment-repository.ts`):**
+  - `MemoryAppointmentRepository` seeded with sample appointments demonstrating all states.
+  - `MongoAppointmentRepository` supporting MongoDB Atlas persistence with seamless fallback.
+- **Client User Interface:**
+  - `BookAppointmentModal.tsx`: Booking dialog accessible from provider profiles and consultation tables.
+  - `AppointmentsPageView.tsx` & `/appointments`: Traveler care portal with status filter tabs, cancellation workflow, timeline audit trail, and notification logs.
+  - `Header.tsx`: Added "Appointments" quick link for authenticated users.
+
+### 2. Actual Test & Build Results
+- **Vitest Unit/Integration Tests (`npm test`):**
+  - `tests/appointment-service.test.ts` (14 tests) — PASSED (Covers initial state invariant, past date rejection, provider confirmation, patient cancellation, terminal state lock, object-level authorization, and notification idempotency).
+  - All 9 test suites passed: 90/90 tests passed in 4.20s (100% passing).
+- **TypeScript Strict Check (`npm run typecheck`):**
+  - Zero errors reported (`tsc --noEmit` exited with code 0).
+- **Next.js Production Build (`npm run build`):**
+  - Compiled successfully; 24 static and dynamic routes generated cleanly including `/appointments` and all appointment API routes.
+
+---
+
 ## Required evidence for each update
 Record:
 - Date and checkpoint

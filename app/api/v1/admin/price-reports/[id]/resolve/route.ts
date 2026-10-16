@@ -7,3 +7,4 @@ export async function POST(
 ) {
   return handlePostResolvePriceReport(request, context);
 }
+

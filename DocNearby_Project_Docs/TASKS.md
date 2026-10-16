@@ -51,11 +51,11 @@
 - [x] Report and wait.
 
 ## CC-06 — Appointments and notifications
-- [ ] Appointment request and confirmation states.
-- [ ] Cancellation/rescheduling rules.
-- [ ] Retry-safe notifications.
-- [ ] Prevent request/confirmation confusion.
-- [ ] Report and wait.
+- [x] Appointment request and confirmation states.
+- [x] Cancellation/rescheduling rules.
+- [x] Retry-safe notifications.
+- [x] Prevent request/confirmation confusion.
+- [x] Report and wait.
 
 ## CC-07 — AI and multilingual assistance
 - [ ] Provider-independent AI adapter.

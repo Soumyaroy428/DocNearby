@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { VerificationStatus, PriceType } from '@/shared/types/provider';
+import { AppointmentStatus } from '@/shared/types/appointment';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -182,5 +183,77 @@ export function checkPriceStaleness(
     };
   }
 }
+
+/**
+ * Returns badge label, visual styling, and plain-English explanation for an appointment status.
+ * Strictly separates "Requested" from "Confirmed" to prevent traveler misunderstanding.
+ */
+export function getAppointmentStatusBadge(status: AppointmentStatus): {
+  label: string;
+  className: string;
+  description: string;
+  isConfirmed: boolean;
+  isPending: boolean;
+} {
+  switch (status) {
+    case 'requested':
+      return {
+        label: 'Request Submitted',
+        className: 'bg-sky-50 text-sky-800 border-sky-300',
+        description: 'Your booking request was received and is awaiting confirmation by the clinic.',
+        isConfirmed: false,
+        isPending: true,
+      };
+    case 'confirmed':
+      return {
+        label: 'Confirmed by Clinic',
+        className: 'bg-emerald-50 text-emerald-800 border-emerald-300',
+        description: 'The clinic has reviewed and officially confirmed this appointment time slot.',
+        isConfirmed: true,
+        isPending: false,
+      };
+    case 'rescheduled':
+      return {
+        label: 'Rescheduled',
+        className: 'bg-amber-50 text-amber-900 border-amber-300',
+        description: 'A new appointment time was proposed or updated.',
+        isConfirmed: true,
+        isPending: false,
+      };
+    case 'cancelled_by_patient':
+      return {
+        label: 'Cancelled by You',
+        className: 'bg-slate-100 text-slate-600 border-slate-300',
+        description: 'You cancelled this appointment request.',
+        isConfirmed: false,
+        isPending: false,
+      };
+    case 'cancelled_by_provider':
+      return {
+        label: 'Declined / Cancelled by Clinic',
+        className: 'bg-rose-50 text-rose-800 border-rose-300',
+        description: 'The clinic was unable to accommodate this request or had to cancel.',
+        isConfirmed: false,
+        isPending: false,
+      };
+    case 'completed':
+      return {
+        label: 'Visit Completed',
+        className: 'bg-purple-50 text-purple-800 border-purple-300',
+        description: 'This consultation was attended and completed.',
+        isConfirmed: true,
+        isPending: false,
+      };
+    case 'no_show':
+      return {
+        label: 'Missed (No-Show)',
+        className: 'bg-slate-100 text-slate-700 border-slate-300',
+        description: 'The patient did not attend the scheduled visit.',
+        isConfirmed: false,
+        isPending: false,
+      };
+  }
+}
+
 
 

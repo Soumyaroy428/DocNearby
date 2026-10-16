@@ -14,6 +14,7 @@ import {
   Globe,
   Accessibility,
   Flag,
+  Calendar,
 } from 'lucide-react';
 import { Provider, ServicePrice } from '@/shared/types/provider';
 import {
@@ -27,6 +28,7 @@ import {
 import { SaveProviderButton } from '@/client/components/providers/SaveProviderButton';
 import { FacilityMap } from '@/client/components/maps/FacilityMap';
 import { PriceReportModal } from '@/client/components/pricing/PriceReportModal';
+import { BookAppointmentModal } from '@/client/components/appointments/BookAppointmentModal';
 
 interface ProviderDetailsViewProps {
   provider: Provider;
@@ -35,6 +37,8 @@ interface ProviderDetailsViewProps {
 export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [selectedReportService, setSelectedReportService] = useState<ServicePrice | undefined>(undefined);
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [bookingServiceId, setBookingServiceId] = useState<string | undefined>(undefined);
   const verification = getVerificationBadge(provider.verificationStatus);
 
   return (
@@ -136,7 +140,18 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
                 </a>
               )}
             </div>
-            <div className="pt-3 mt-3 border-t border-slate-200">
+            <div className="pt-3 mt-3 border-t border-slate-200 space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setBookingServiceId(undefined);
+                  setIsBookingOpen(true);
+                }}
+                className="w-full py-2 px-3 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5"
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                <span>Request Appointment</span>
+              </button>
               <SaveProviderButton providerId={provider.id} variant="details" />
             </div>
           </div>
@@ -308,16 +323,29 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
                         </span>
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedReportService(srv);
-                            setIsReportModalOpen(true);
-                          }}
-                          className="text-xs text-slate-500 hover:text-amber-700 underline font-medium"
-                        >
-                          Report correction
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setBookingServiceId(srv.id);
+                              setIsBookingOpen(true);
+                            }}
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-teal-700 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-2.5 py-1 rounded-lg transition-colors"
+                          >
+                            <Calendar className="w-3 h-3" />
+                            <span>Book Slot</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedReportService(srv);
+                              setIsReportModalOpen(true);
+                            }}
+                            className="text-xs text-slate-500 hover:text-amber-700 underline font-medium"
+                          >
+                            Report
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -344,6 +372,13 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
         service={selectedReportService}
         isOpen={isReportModalOpen}
         onClose={() => setIsReportModalOpen(false)}
+      />
+
+      <BookAppointmentModal
+        provider={provider}
+        initialServiceId={bookingServiceId}
+        isOpen={isBookingOpen}
+        onClose={() => setIsBookingOpen(false)}
       />
     </div>
   );

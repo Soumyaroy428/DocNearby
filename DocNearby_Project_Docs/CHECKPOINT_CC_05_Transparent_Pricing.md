@@ -101,3 +101,4 @@ In healthcare discovery—particularly for travelers in unfamiliar cities—unpr
 - [x] Filter, sorting, and pricing unit tests verified (76/76 passed).
 - [x] TypeScript typechecking passed (`tsc --noEmit` clean).
 - [x] Next.js production build succeeded (`npm run build` clean).
+

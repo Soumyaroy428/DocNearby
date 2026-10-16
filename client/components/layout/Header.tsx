@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { HeartPulse, AlertCircle, Search, ShieldCheck, User, Stethoscope, ShieldAlert, Scale } from 'lucide-react';
+import { HeartPulse, AlertCircle, Search, ShieldCheck, User, Stethoscope, ShieldAlert, Scale, Calendar } from 'lucide-react';
 import { UserPublicProfile } from '@/shared/types/auth';
 
 export function Header() {
@@ -94,6 +94,14 @@ export function Header() {
 
             {user ? (
               <div className="flex items-center gap-2">
+                <Link
+                  href="/appointments"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 hover:text-teal-700 hover:bg-slate-200/70 font-semibold text-xs transition-colors border border-slate-200"
+                  title="My Appointments"
+                >
+                  <Calendar className="w-3.5 h-3.5 text-teal-600" />
+                  <span className="hidden sm:inline">Appointments</span>
+                </Link>
                 <Link
                   href="/account"
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-50 text-teal-800 hover:bg-teal-100 font-semibold text-xs transition-colors border border-teal-200"

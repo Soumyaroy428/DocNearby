@@ -25,3 +25,4 @@ export const adminResolvePriceReportSchema = z.object({
 });
 
 export type AdminResolvePriceReportInput = z.infer<typeof adminResolvePriceReportSchema>;
+
