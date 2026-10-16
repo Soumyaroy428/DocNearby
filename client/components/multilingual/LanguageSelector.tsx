@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { BookOpen } from 'lucide-react';
-import { SUPPORTED_LANGUAGES, SupportedLanguage } from '@/shared/types/multilingual';
+import { SUPPORTED_LANGUAGES } from '@/shared/types/multilingual';
+import { useLanguage } from '@/client/context/LanguageContext';
 import { TravelerPhrasebookModal } from './TravelerPhrasebookModal';
 
 interface LanguageSelectorProps {
@@ -10,7 +11,7 @@ interface LanguageSelectorProps {
 }
 
 export function LanguageSelector({ fullWidth = false }: LanguageSelectorProps) {
-  const [selectedLang, setSelectedLang] = useState<SupportedLanguage>('en');
+  const { language, setLanguage, t } = useLanguage();
   const [isPhrasebookOpen, setIsPhrasebookOpen] = useState<boolean>(false);
 
   if (fullWidth) {
@@ -23,9 +24,9 @@ export function LanguageSelector({ fullWidth = false }: LanguageSelectorProps) {
               <button
                 key={lang.code}
                 type="button"
-                onClick={() => setSelectedLang(lang.code)}
+                onClick={() => setLanguage(lang.code)}
                 className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-colors text-center ${
-                  selectedLang === lang.code
+                  language === lang.code
                     ? 'bg-white text-slate-900 shadow-2xs'
                     : 'text-slate-500 hover:text-slate-800'
                 }`}
@@ -42,7 +43,7 @@ export function LanguageSelector({ fullWidth = false }: LanguageSelectorProps) {
             className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-semibold border border-teal-200 transition-colors"
           >
             <BookOpen className="w-4 h-4 text-teal-600" />
-            <span>Open Medical Travel Phrasebook</span>
+            <span>{t.nav.phrasebook}</span>
           </button>
         </div>
 
@@ -64,7 +65,7 @@ export function LanguageSelector({ fullWidth = false }: LanguageSelectorProps) {
           title="Open Medical Travel Phrasebook (English, Hindi, Bengali)"
         >
           <BookOpen className="w-3.5 h-3.5 text-teal-600" />
-          <span className="hidden sm:inline">Phrasebook</span>
+          <span className="hidden sm:inline">{t.nav.phrasebook}</span>
         </button>
 
         <div className="relative inline-block text-left">
@@ -73,9 +74,9 @@ export function LanguageSelector({ fullWidth = false }: LanguageSelectorProps) {
               <button
                 key={lang.code}
                 type="button"
-                onClick={() => setSelectedLang(lang.code)}
+                onClick={() => setLanguage(lang.code)}
                 className={`px-2 py-0.5 rounded text-[11px] font-bold transition-colors ${
-                  selectedLang === lang.code
+                  language === lang.code
                     ? 'bg-white text-slate-900 shadow-2xs'
                     : 'text-slate-500 hover:text-slate-800'
                 }`}

@@ -27,8 +27,10 @@ import { GoogleDiscoveryMap } from '@/client/components/maps/GoogleDiscoveryMap'
 import { useGeolocation } from '@/client/hooks/useGeolocation';
 import { BookAppointmentModal } from '@/client/components/appointments/BookAppointmentModal';
 import { Provider } from '@/shared/types/provider';
+import { useLanguage } from '@/client/context/LanguageContext';
 
 export function DiscoveryPageView() {
+  const { t } = useLanguage();
   const { state: geoState, errorMessage: geoError, requestLocation, clearLocation } = useGeolocation();
 
   // Search parameters
@@ -152,10 +154,10 @@ export function DiscoveryPageView() {
             Unified Healthcare Discovery • Google Places &amp; DocNearby
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Discover Healthcare Everywhere You Go
+            {t.discovery.title}
           </h1>
           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            Search nearby publicly listed clinics and hospitals on Google Maps alongside DocNearby-registered doctors with confirmed consultation pricing and verified medical council credentials.
+            {t.discovery.subtitle}
           </p>
         </div>
       </div>
@@ -272,7 +274,7 @@ export function DiscoveryPageView() {
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              All Sources
+              {t.discovery.allSources}
               {meta && (
                 <span className="ml-1.5 px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-700 text-[10px]">
                   {meta.total}
@@ -290,7 +292,7 @@ export function DiscoveryPageView() {
               }`}
             >
               <span className="w-2 h-2 rounded-full bg-teal-600" />
-              DocNearby
+              {t.discovery.docnearbyOnly}
               {meta && (
                 <span className="ml-1 px-1.5 py-0.2 rounded-full bg-teal-100 text-teal-800 text-[10px]">
                   {meta.totalDocNearby}
@@ -308,7 +310,7 @@ export function DiscoveryPageView() {
               }`}
             >
               <span className="w-2 h-2 rounded-full bg-indigo-500" />
-              Google Places
+              {t.discovery.googlePlacesOnly}
               {meta && (
                 <span className="ml-1 px-1.5 py-0.2 rounded-full bg-indigo-100 text-indigo-800 text-[10px]">
                   {meta.totalGooglePlaces}
@@ -331,7 +333,7 @@ export function DiscoveryPageView() {
                 title="Split map and list view"
               >
                 <SlidersHorizontal className="w-3.5 h-3.5 text-teal-600" />
-                Split
+                {t.discovery.splitView}
               </button>
               <button
                 type="button"
@@ -344,7 +346,7 @@ export function DiscoveryPageView() {
                 title="Cards only"
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
-                Cards
+                {t.discovery.cardsView}
               </button>
               <button
                 type="button"
@@ -357,7 +359,7 @@ export function DiscoveryPageView() {
                 title="Map view only"
               >
                 <MapIcon className="w-3.5 h-3.5 text-teal-600" />
-                Map
+                {t.discovery.mapView}
               </button>
             </div>
 
@@ -368,7 +370,7 @@ export function DiscoveryPageView() {
               title="Reset all search filters"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              Reset
+              {t.filters.resetAll}
             </button>
           </div>
         </div>
@@ -396,7 +398,7 @@ export function DiscoveryPageView() {
             onClick={executeSearch}
             className="text-xs font-semibold px-4 py-2 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition-colors"
           >
-            Retry Search
+            {t.discovery.retry}
           </button>
         </div>
       )}
@@ -408,17 +410,17 @@ export function DiscoveryPageView() {
             <div className="p-12 text-center bg-white border border-slate-200 rounded-3xl shadow-xs space-y-3">
               <Compass className="w-10 h-10 text-slate-400 mx-auto" />
               <h3 className="text-base font-bold text-slate-900">
-                No healthcare locations found
+                {t.discovery.noResultsTitle}
               </h3>
               <p className="text-xs text-slate-500 max-w-md mx-auto">
-                No matching clinics, doctors, or hospitals were found within your current radius or filter parameters. Try increasing your search radius or clearing query terms.
+                {t.discovery.noResultsDesc}
               </p>
               <button
                 type="button"
                 onClick={handleResetFilters}
                 className="mt-2 text-xs font-semibold px-4 py-2 rounded-xl bg-teal-50 text-teal-800 border border-teal-200 hover:bg-teal-100 transition-colors"
               >
-                Reset Search Filters
+                {t.discovery.resetFilters}
               </button>
             </div>
           ) : viewMode === 'map' ? (

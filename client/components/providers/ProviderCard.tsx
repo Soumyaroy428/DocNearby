@@ -5,6 +5,7 @@ import { Provider } from '@/shared/types/provider';
 import { formatPaiseToRupees, formatDate, getVerificationBadge, getPriceTypeBadge, checkPriceStaleness } from '@/shared/utils/formatters';
 import { formatDistance, getDirectionsUrl } from '@/shared/utils/geo';
 import { SaveProviderButton } from '@/client/components/providers/SaveProviderButton';
+import { useLanguage } from '@/client/context/LanguageContext';
 
 interface ProviderCardProps {
   provider: Provider;
@@ -13,6 +14,7 @@ interface ProviderCardProps {
 }
 
 export function ProviderCard({ provider, isComparing, onToggleCompare }: ProviderCardProps) {
+  const { t } = useLanguage();
   const primaryFacility = provider.facilities[0];
   const primaryService = provider.services[0];
   const verification = getVerificationBadge(provider.verificationStatus);
@@ -48,7 +50,7 @@ export function ProviderCard({ provider, isComparing, onToggleCompare }: Provide
 
             {provider.isDemonstration && (
               <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
-                Demo Listing
+                {t.discovery.demoListing}
               </span>
             )}
           </div>
@@ -69,7 +71,7 @@ export function ProviderCard({ provider, isComparing, onToggleCompare }: Provide
                 title={isComparing ? 'Remove from comparison' : 'Add to side-by-side comparison (max 3)'}
               >
                 <Scale className="w-3 h-3" />
-                {isComparing ? 'Comparing' : 'Compare'}
+                {isComparing ? t.discovery.comparing : t.discovery.compare}
               </button>
             )}
             <SaveProviderButton providerId={provider.id} />
@@ -112,7 +114,7 @@ export function ProviderCard({ provider, isComparing, onToggleCompare }: Provide
 
           <div className="flex items-center gap-1.5">
             <Languages className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-            <span>Spoken: {provider.languages.join(', ')}</span>
+            <span>{t.discovery.spoken} {provider.languages.join(', ')}</span>
           </div>
         </div>
 
@@ -158,7 +160,7 @@ export function ProviderCard({ provider, isComparing, onToggleCompare }: Provide
           </div>
         ) : (
           <div className="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-500 italic">
-            Consultation fee not published
+            {t.discovery.feeUnverified}
           </div>
         )}
       </div>
@@ -178,7 +180,7 @@ export function ProviderCard({ provider, isComparing, onToggleCompare }: Provide
               title="Get Directions in Maps"
             >
               <Navigation className="w-3 h-3 text-teal-600" />
-              Directions
+              {t.discovery.directions}
             </a>
           )}
 
@@ -186,7 +188,7 @@ export function ProviderCard({ provider, isComparing, onToggleCompare }: Provide
             href={`/providers/${provider.id}`}
             className="inline-flex items-center gap-1 text-xs font-semibold text-teal-700 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-lg transition-colors"
           >
-            View Details
+            {t.discovery.viewDetails}
             <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import { AppProviders } from '@/client/components/providers/AppProviders';
 import { Header } from '@/client/components/layout/Header';
 import { Footer } from '@/client/components/layout/Footer';
 
@@ -22,9 +23,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="overflow-x-hidden">
       <body className="min-h-screen flex flex-col bg-slate-50 text-slate-900 overflow-x-hidden w-full max-w-full">
-        <Header />
-        <main className="flex-1 w-full max-w-full">{children}</main>
-        <Footer />
+        <AppProviders>
+          <Header />
+          <main className="flex-1 w-full max-w-full">{children}</main>
+          <Footer />
+        </AppProviders>
       </body>
     </html>
   );

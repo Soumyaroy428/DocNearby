@@ -30,12 +30,14 @@ import { FacilityMap } from '@/client/components/maps/FacilityMap';
 import { PriceReportModal } from '@/client/components/pricing/PriceReportModal';
 import { BookAppointmentModal } from '@/client/components/appointments/BookAppointmentModal';
 import { ProviderReviewsSection } from '@/client/components/reviews/ProviderReviewsSection';
+import { useLanguage } from '@/client/context/LanguageContext';
 
 interface ProviderDetailsViewProps {
   provider: Provider;
 }
 
 export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
+  const { t } = useLanguage();
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [selectedReportService, setSelectedReportService] = useState<ServicePrice | undefined>(undefined);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -50,7 +52,7 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
           className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-teal-700 bg-white border border-slate-200 px-3 py-1.5 rounded-lg transition-colors shadow-2xs"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          Back to Search Results
+          {t.providerDetail.backToSearch}
         </Link>
       </div>
 
@@ -111,7 +113,7 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
 
           <div className="flex-shrink-0 bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:min-w-[240px]">
             <span className="text-xs font-semibold text-slate-900 block mb-2.5">
-              Contact & Inquiries
+              {t.providerDetail.contactInquiries}
             </span>
             <div className="space-y-2 text-xs text-slate-700">
               {provider.publicContact.phone && (
@@ -151,7 +153,7 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
                 className="w-full py-2 px-3 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5"
               >
                 <Calendar className="w-3.5 h-3.5" />
-                <span>Request Appointment</span>
+                <span>{t.providerDetail.requestAppointment}</span>
               </button>
               <SaveProviderButton providerId={provider.id} variant="details" />
             </div>
@@ -161,7 +163,7 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
         <div className="mt-6 pt-5 border-t border-slate-100 flex items-center gap-2 text-xs text-slate-700">
           <Languages className="w-4 h-4 text-teal-600 flex-shrink-0" />
           <span>
-            <strong>Languages Spoken:</strong> {provider.languages.join(', ')}
+            <strong>{t.providerDetail.languagesSpoken}</strong> {provider.languages.join(', ')}
           </span>
         </div>
       </div>
@@ -174,22 +176,22 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
             </div>
             <div>
               <h2 className="text-sm font-bold text-slate-900">
-                Verification & Credentials Evidence
+                {t.providerDetail.verificationEvidence}
               </h2>
               <p className="text-xs text-slate-500">
-                Evidence-based audit of statutory registration
+                {t.providerDetail.verificationAudit}
               </p>
             </div>
           </div>
 
           <div className="space-y-3 text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">
             <div>
-              <span className="text-slate-500 block font-medium">Verification Status:</span>
+              <span className="text-slate-500 block font-medium">{t.providerDetail.verificationStatus}</span>
               <span className="font-semibold text-slate-900">{verification.label}</span>
             </div>
 
             <div>
-              <span className="text-slate-500 block font-medium">What was checked:</span>
+              <span className="text-slate-500 block font-medium">{t.providerDetail.whatWasChecked}</span>
               <span className="text-slate-800">
                 {provider.verificationDetail?.whatWasChecked || provider.verificationSummary}
               </span>
@@ -197,7 +199,7 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
 
             {provider.registrationReference && (
               <div>
-                <span className="text-slate-500 block font-medium">Regulatory Registration Ref:</span>
+                <span className="text-slate-500 block font-medium">{t.providerDetail.regRef}</span>
                 <span className="font-mono text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200 inline-block mt-0.5">
                   {provider.registrationReference}
                 </span>
@@ -207,11 +209,11 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
             {provider.verificationDetail && (
               <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/60 text-[11px]">
                 <div>
-                  <span className="text-slate-500 block">Verified By:</span>
+                  <span className="text-slate-500 block">{t.providerDetail.verifiedBy}</span>
                   <span className="font-medium text-slate-800">{provider.verificationDetail.checkedBy}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Verification Date:</span>
+                  <span className="text-slate-500 block">{t.providerDetail.verificationDate}</span>
                   <span className="font-medium text-slate-800">{formatDate(provider.verificationDetail.checkedAt)}</span>
                 </div>
               </div>
@@ -230,7 +232,7 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
             </div>
             <div>
               <h2 className="text-sm font-bold text-slate-900">
-                Facility Location, Map & Directions
+                {t.providerDetail.facilityMap}
               </h2>
               <p className="text-xs text-slate-500">
                 Turn-by-turn navigation, hours & verified accessibility features

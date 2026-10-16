@@ -20,9 +20,11 @@ import {
 import { UserPublicProfile } from '@/shared/types/auth';
 import { LanguageSelector } from '@/client/components/multilingual/LanguageSelector';
 import { TravelerPhrasebookModal } from '@/client/components/multilingual/TravelerPhrasebookModal';
+import { useLanguage } from '@/client/context/LanguageContext';
 
 export function Header() {
   const pathname = usePathname();
+  const { t } = useLanguage();
   const [user, setUser] = useState<UserPublicProfile | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isPhrasebookOpen, setIsPhrasebookOpen] = useState(false);
@@ -57,7 +59,7 @@ export function Header() {
           <div className="flex items-start sm:items-center gap-2 max-w-7xl mx-auto w-full">
             <AlertCircle className="w-3.5 h-3.5 text-rose-600 flex-shrink-0 mt-0.5 sm:mt-0" />
             <p className="leading-tight sm:leading-normal text-[11px] sm:text-xs">
-              <strong className="font-semibold text-rose-950">Medical Emergency?</strong> If you require urgent medical care, immediately dial local emergency services: <strong className="text-rose-950">112</strong> / <strong className="text-rose-950">102</strong> (India). DocNearby is for discovery only.
+              {t.nav.emergencyWarning}
             </p>
           </div>
         </div>
@@ -97,7 +99,7 @@ export function Header() {
                 }`}
               >
                 <Search className="w-4 h-4 text-slate-500" />
-                <span>Find Care</span>
+                <span>{t.nav.findCare}</span>
               </Link>
 
               <Link
@@ -110,9 +112,9 @@ export function Header() {
                 title="Interactive Google Maps & Places Discovery"
               >
                 <Compass className="w-4 h-4 text-teal-600" />
-                <span>Map Discovery</span>
+                <span>{t.nav.mapDiscovery}</span>
                 <span className="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.2 rounded-full font-bold">
-                  New
+                  {t.nav.newBadge}
                 </span>
               </Link>
 
@@ -125,7 +127,7 @@ export function Header() {
                 }`}
               >
                 <Stethoscope className="w-3.5 h-3.5 text-teal-600" />
-                <span>List Practice</span>
+                <span>{t.nav.listPractice}</span>
               </Link>
 
               {user?.role === 'admin' && (
@@ -136,7 +138,7 @@ export function Header() {
                     title="Provider Verifications"
                   >
                     <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
-                    <span>Verifications</span>
+                    <span>{t.nav.verifications}</span>
                   </Link>
                   <Link
                     href="/admin/price-reports"
@@ -144,7 +146,7 @@ export function Header() {
                     title="Price Reports & Staleness Audits"
                   >
                     <Scale className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>Price Reports</span>
+                    <span>{t.nav.priceReports}</span>
                   </Link>
                 </div>
               )}
@@ -164,7 +166,7 @@ export function Header() {
                       title="My Appointments"
                     >
                       <Calendar className="w-3.5 h-3.5 text-teal-600" />
-                      <span>Appointments</span>
+                      <span>{t.nav.appointments}</span>
                     </Link>
                     <Link
                       href="/account"
@@ -180,13 +182,13 @@ export function Header() {
                       href="/login"
                       className="text-xs font-semibold text-slate-700 hover:text-teal-700 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
                     >
-                      Sign In
+                      {t.nav.signIn}
                     </Link>
                     <Link
                       href="/register"
                       className="text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 px-3.5 py-1.5 rounded-xl transition-colors shadow-xs"
                     >
-                      Register
+                      {t.nav.register}
                     </Link>
                   </div>
                 )}
@@ -238,7 +240,7 @@ export function Header() {
                   }`}
                 >
                   <Search className="w-4 h-4 text-teal-600" />
-                  <span>Find Care</span>
+                  <span>{t.nav.findCare}</span>
                 </Link>
 
                 <Link
@@ -252,7 +254,7 @@ export function Header() {
                 >
                   <div className="flex items-center gap-2.5">
                     <Compass className="w-4 h-4 text-teal-600" />
-                    <span>Map Discovery</span>
+                    <span>{t.nav.mapDiscovery}</span>
                   </div>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
                     Google Maps
@@ -269,7 +271,7 @@ export function Header() {
                   }`}
                 >
                   <Stethoscope className="w-4 h-4 text-teal-600" />
-                  <span>List Practice / Clinic</span>
+                  <span>{t.nav.listPractice}</span>
                 </Link>
               </div>
 
@@ -285,15 +287,15 @@ export function Header() {
                     className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-200"
                   >
                     <ShieldAlert className="w-4 h-4 text-amber-600" />
-                    <span>Provider Verifications</span>
+                    <span>{t.nav.verifications}</span>
                   </Link>
                   <Link
                     href="/admin/price-reports"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-indigo-800 bg-indigo-50 border border-indigo-200"
                   >
-                    <Scale className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>Price Reports &amp; Staleness</span>
+                    <Scale className="w-4 h-4 text-indigo-600" />
+                    <span>{t.nav.priceReports}</span>
                   </Link>
                 </div>
               )}
@@ -326,7 +328,7 @@ export function Header() {
                         className="py-2.5 px-3 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors border border-slate-200"
                       >
                         <Calendar className="w-3.5 h-3.5 text-teal-600" />
-                        <span>Appointments</span>
+                        <span>{t.nav.appointments}</span>
                       </Link>
                       <Link
                         href="/account"
@@ -334,7 +336,7 @@ export function Header() {
                         className="py-2.5 px-3 rounded-xl bg-teal-50 text-teal-800 hover:bg-teal-100 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors border border-teal-200"
                       >
                         <User className="w-3.5 h-3.5 text-teal-600" />
-                        <span>My Account</span>
+                        <span>{t.nav.myAccount}</span>
                       </Link>
                     </div>
                   </div>
@@ -345,14 +347,14 @@ export function Header() {
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="py-2.5 px-4 rounded-xl text-center text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors border border-slate-200"
                     >
-                      Sign In
+                      {t.nav.signIn}
                     </Link>
                     <Link
                       href="/register"
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="py-2.5 px-4 rounded-xl text-center text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 transition-colors shadow-xs"
                     >
-                      Register
+                      {t.nav.register}
                     </Link>
                   </div>
                 )}

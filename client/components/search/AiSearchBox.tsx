@@ -15,6 +15,7 @@ import {
 import { ValidatedAiSearchIntent } from '@/server/validation/search';
 import { AiSafetyAssessment } from '@/shared/types/multilingual';
 import { formatPaiseToRupees } from '@/shared/utils/formatters';
+import { useLanguage } from '@/client/context/LanguageContext';
 
 interface AiSearchBoxProps {
   onFiltersExtracted: (intent: ValidatedAiSearchIntent) => void;
@@ -29,6 +30,7 @@ const EXAMPLE_QUERIES = [
 ];
 
 export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps) {
+  const { t } = useLanguage();
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -103,13 +105,13 @@ export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps)
           </div>
           <div>
             <h2 className="text-sm font-bold text-slate-900 flex flex-wrap items-center gap-1.5 sm:gap-2">
-              Natural Language Healthcare Assistant
+              {t.aiSearch.title}
               <span className="text-[10px] font-semibold text-teal-800 bg-teal-100/80 px-2 py-0.5 rounded-full">
-                Multilingual (EN • HI • BN)
+                {t.aiSearch.badge}
               </span>
             </h2>
             <p className="text-xs text-slate-500">
-              Type naturally in English, हिन्दी, or বাংলা. Converts to validated search filters only.
+              {t.aiSearch.subtitle}
             </p>
           </div>
         </div>
@@ -120,7 +122,7 @@ export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps)
             title="Personal data (phones, emails, IDs) is scrubbed before processing"
           >
             <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
-            Privacy Scrubbed
+            {t.aiSearch.privacyScrubbed}
           </span>
 
           {extractedIntent && (
@@ -129,7 +131,7 @@ export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps)
               className="text-xs text-slate-600 hover:text-slate-900 flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors"
             >
               <X className="w-3.5 h-3.5" />
-              Clear
+              {t.aiSearch.clear}
             </button>
           )}
         </div>
@@ -141,7 +143,7 @@ export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps)
             type="text"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="e.g. Find an English-speaking dermatologist in Kolkata under ₹1,000 / কলকাতা বা দিল্লিতে ডাক্তার"
+            placeholder={t.aiSearch.placeholder}
             className="w-full px-4 py-2.5 text-xs sm:text-sm rounded-2xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 bg-white shadow-xs"
             disabled={isLoading}
             maxLength={500}
@@ -154,11 +156,11 @@ export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps)
             {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="hidden sm:inline">Processing...</span>
+                <span className="hidden sm:inline">{t.aiSearch.processing}</span>
               </>
             ) : (
               <>
-                <span>Search</span>
+                <span>{t.aiSearch.searchBtn}</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -215,7 +217,7 @@ export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps)
       {!extractedIntent && (
         <div>
           <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider block mb-1.5">
-            Try asking in any language:
+            {t.aiSearch.tryAsking}
           </span>
           <div className="flex flex-wrap gap-1.5">
             {EXAMPLE_QUERIES.map((example, idx) => (

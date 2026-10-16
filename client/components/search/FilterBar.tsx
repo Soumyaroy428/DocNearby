@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { SearchFilters, ProviderType, SearchSortBy } from '@/shared/types/provider';
 import { useGeolocation } from '@/client/hooks/useGeolocation';
+import { useLanguage } from '@/client/context/LanguageContext';
 
 interface FilterBarProps {
   filters: SearchFilters;
@@ -34,6 +35,7 @@ export function FilterBar({
   onFilterChange,
   onReset,
 }: FilterBarProps) {
+  const { t } = useLanguage();
   const { state: geoState, errorMessage: geoError, requestLocation, clearLocation } = useGeolocation();
 
   const isGeoActive =
@@ -73,7 +75,7 @@ export function FilterBar({
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
           <Search className="w-4 h-4 text-teal-600" />
-          Filter Healthcare Providers
+          {t.filters.title}
         </h3>
 
         {hasActiveFilters && (
@@ -85,7 +87,7 @@ export function FilterBar({
             className="text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 transition-colors"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            Reset all
+            {t.filters.resetAll}
           </button>
         )}
       </div>
@@ -96,7 +98,7 @@ export function FilterBar({
           <div className="flex items-center justify-between">
             <label className="text-xs font-medium text-slate-700 flex items-center gap-1">
               <MapPin className="w-3.5 h-3.5 text-teal-600" />
-              City or Locality
+              {t.filters.city}
             </label>
             <button
               type="button"
@@ -112,18 +114,18 @@ export function FilterBar({
               {geoState === 'locating' ? (
                 <>
                   <Loader2 className="w-3 h-3 animate-spin" />
-                  Locating...
+                  {t.filters.locating}
                 </>
               ) : isGeoActive ? (
                 <>
                   <Navigation className="w-3 h-3 fill-emerald-600 text-emerald-600" />
-                  GPS Active
+                  {t.filters.gpsActive}
                   <X className="w-3 h-3 ml-0.5 hover:text-red-600" />
                 </>
               ) : (
                 <>
                   <Navigation className="w-3 h-3 text-teal-600" />
-                  Near Me
+                  {t.filters.nearMe}
                 </>
               )}
             </button>
@@ -135,7 +137,7 @@ export function FilterBar({
               list="city-suggestions"
               value={filters.city || ''}
               onChange={(e) => onFilterChange('city', e.target.value)}
-              placeholder={isGeoActive ? 'GPS location enabled (or type city)' : 'e.g. Kolkata, Salt Lake'}
+              placeholder={isGeoActive ? 'GPS location enabled' : t.filters.cityPlaceholder}
               className="w-full text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 bg-white"
             />
             <datalist id="city-suggestions">
@@ -150,14 +152,14 @@ export function FilterBar({
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-slate-700 flex items-center gap-1">
             <Stethoscope className="w-3.5 h-3.5 text-teal-600" />
-            Specialty
+            {t.filters.specialty}
           </label>
           <select
             value={filters.specialty || ''}
             onChange={(e) => onFilterChange('specialty', e.target.value)}
             className="w-full text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 bg-white"
           >
-            <option value="">All Specialties</option>
+            <option value="">{t.filters.allSpecialties}</option>
             {metadata.specialties.map((spec) => (
               <option key={spec} value={spec}>
                 {spec}
@@ -170,14 +172,14 @@ export function FilterBar({
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-slate-700 flex items-center gap-1">
             <Languages className="w-3.5 h-3.5 text-teal-600" />
-            Language Spoken
+            {t.filters.language}
           </label>
           <select
             value={filters.language || ''}
             onChange={(e) => onFilterChange('language', e.target.value)}
             className="w-full text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 bg-white"
           >
-            <option value="">Any Language</option>
+            <option value="">{t.filters.anyLanguage}</option>
             {metadata.languages.map((lang) => (
               <option key={lang} value={lang}>
                 {lang}
@@ -190,7 +192,7 @@ export function FilterBar({
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-slate-700 flex items-center gap-1">
             <IndianRupee className="w-3.5 h-3.5 text-teal-600" />
-            Max Consultation Fee
+            {t.filters.maxFee}
           </label>
           <select
             value={filters.maxFeeMinor ? String(filters.maxFeeMinor) : ''}
@@ -200,7 +202,7 @@ export function FilterBar({
             }}
             className="w-full text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 bg-white"
           >
-            <option value="">Any Fee</option>
+            <option value="">{t.filters.anyFee}</option>
             <option value="50000">Under ₹500</option>
             <option value="80000">Under ₹800</option>
             <option value="100000">Under ₹1,000</option>
@@ -227,10 +229,10 @@ export function FilterBar({
           <span className="text-xs text-slate-500 mr-1">Facility:</span>
           {(
             [
-              { label: 'All', value: undefined },
-              { label: 'Doctors', value: 'doctor' },
-              { label: 'Clinics', value: 'clinic' },
-              { label: 'Diagnostics', value: 'diagnostic_center' },
+              { label: t.filters.facilityAll, value: undefined },
+              { label: t.filters.facilityDoctors, value: 'doctor' },
+              { label: t.filters.facilityClinics, value: 'clinic' },
+              { label: t.filters.facilityDiagnostics, value: 'diagnostic_center' },
             ] as { label: string; value: ProviderType | undefined }[]
           ).map((item) => {
             const isActive = filters.providerType === item.value;
@@ -256,7 +258,7 @@ export function FilterBar({
           {/* Radius selector when GPS location is active */}
           {isGeoActive && (
             <div className="flex items-center gap-1.5 text-xs">
-              <span className="text-slate-500">Radius:</span>
+              <span className="text-slate-500">{t.filters.radius}:</span>
               <select
                 value={filters.radiusKm || 10}
                 onChange={(e) => onFilterChange('radiusKm', Number(e.target.value))}
@@ -273,16 +275,16 @@ export function FilterBar({
           {/* Sort By Selector */}
           <div className="flex items-center gap-1.5 text-xs">
             <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-slate-500">Sort:</span>
+            <span className="text-slate-500">{t.filters.sort}:</span>
             <select
               value={filters.sortBy || (isGeoActive ? 'distance' : 'relevance')}
               onChange={(e) => onFilterChange('sortBy', e.target.value as SearchSortBy)}
               className="text-xs px-2 py-1 rounded-lg border border-slate-200 bg-white font-medium text-slate-800"
             >
-              <option value="relevance">Relevance</option>
-              <option value="distance">Distance (Nearest First)</option>
-              <option value="fee_asc">Consultation Fee: Low to High</option>
-              <option value="fee_desc">Consultation Fee: High to Low</option>
+              <option value="relevance">{t.filters.sortRelevance}</option>
+              <option value="distance">{t.filters.sortDistance}</option>
+              <option value="fee_asc">{t.filters.sortFeeAsc}</option>
+              <option value="fee_desc">{t.filters.sortFeeDesc}</option>
             </select>
           </div>
         </div>

@@ -10,8 +10,10 @@ import { FilterBar } from '@/client/components/search/FilterBar';
 import { ProviderCard } from '@/client/components/providers/ProviderCard';
 import { ProviderMapView } from '@/client/components/maps/ProviderMapView';
 import { ProviderComparisonDrawer } from '@/client/components/pricing/ProviderComparisonDrawer';
+import { useLanguage } from '@/client/context/LanguageContext';
 
 export function HomePageView() {
+  const { t } = useLanguage();
   const [viewMode, setViewMode] = useState<'cards' | 'map'>('cards');
   const [filters, setFilters] = useState<SearchFilters>({
     city: '',
@@ -171,13 +173,13 @@ export function HomePageView() {
       <div className="text-center max-w-3xl mx-auto space-y-3 pt-2 pb-4">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-xs font-semibold">
           <Shield className="w-3.5 h-3.5 text-teal-600" />
-          Evidence-Based Healthcare Discovery for Travelers
+          {t.hero.badge}
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-          Find Trusted Healthcare, <span className="text-teal-600">Wherever You Are</span>
+          {t.hero.titlePart1} <span className="text-teal-600">{t.hero.titlePart2}</span>
         </h1>
         <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-          Search local doctors, clinics, and diagnostic facilities with transparent consultation pricing, language compatibility, and verified regulatory registrations in unfamiliar cities.
+          {t.hero.subtitle}
         </p>
       </div>
 
@@ -189,13 +191,13 @@ export function HomePageView() {
           </div>
           <div>
             <h3 className="text-sm font-bold text-slate-900 flex flex-wrap items-center gap-1.5 sm:gap-2">
-              Interactive Google Maps &amp; Healthcare Places Discovery
+              {t.mapsBanner.title}
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
-                New
+                {t.mapsBanner.newBadge}
               </span>
             </h3>
             <p className="text-xs text-slate-600 mt-0.5">
-              Explore publicly listed clinics &amp; hospitals on Google Maps combined with DocNearby-verified doctors and transparent fees.
+              {t.mapsBanner.subtitle}
             </p>
           </div>
         </div>
@@ -204,7 +206,7 @@ export function HomePageView() {
           className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-xs transition-colors flex-shrink-0 text-center"
         >
           <Navigation className="w-3.5 h-3.5" />
-          Open Map Discovery
+          {t.mapsBanner.button}
         </Link>
       </div>
 
@@ -231,11 +233,11 @@ export function HomePageView() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <h2 className="text-base font-bold text-slate-900">
-              Healthcare Providers
+              {t.discovery.providersTitle}
             </h2>
             {result && !isLoading && (
               <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                {result.meta.total} {result.meta.total === 1 ? 'result' : 'results'}
+                {result.meta.total} {t.discovery.resultsLabel}
               </span>
             )}
           </div>
@@ -253,7 +255,7 @@ export function HomePageView() {
                 }`}
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
-                Cards
+                {t.discovery.cardsView}
               </button>
               <button
                 type="button"
@@ -265,7 +267,7 @@ export function HomePageView() {
                 }`}
               >
                 <MapIcon className="w-3.5 h-3.5 text-teal-600" />
-                Map View
+                {t.discovery.mapView}
               </button>
             </div>
 
@@ -276,7 +278,7 @@ export function HomePageView() {
               title="Refresh results"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
+              {t.discovery.refresh}
             </button>
           </div>
         </div>
@@ -308,7 +310,7 @@ export function HomePageView() {
               onClick={() => loadProviders(filters)}
               className="text-xs font-semibold px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
             >
-              Retry Search
+              {t.discovery.retry}
             </button>
           </div>
         )}
@@ -320,9 +322,9 @@ export function HomePageView() {
               <Search className="w-6 h-6" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-bold text-slate-900">No healthcare providers found</h3>
+              <h3 className="text-base font-bold text-slate-900">{t.discovery.noResultsTitle}</h3>
               <p className="text-xs text-slate-500 max-w-md mx-auto">
-                No matching verified or demonstration providers were found with your current filter criteria.
+                {t.discovery.noResultsDesc}
               </p>
             </div>
             <div className="pt-2">
@@ -330,7 +332,7 @@ export function HomePageView() {
                 onClick={handleResetFilters}
                 className="text-xs font-semibold px-4 py-2 bg-teal-50 text-teal-700 border border-teal-200 rounded-lg hover:bg-teal-100 transition-colors"
               >
-                Clear all filters and show all providers
+                {t.discovery.resetFilters}
               </button>
             </div>
           </div>

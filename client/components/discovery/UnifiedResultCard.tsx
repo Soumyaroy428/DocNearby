@@ -22,6 +22,7 @@ import {
 import { UnifiedHealthcareListing } from '@/shared/types/discovery';
 import { formatDistance } from '@/shared/utils/geo';
 import { formatPaiseToRupees } from '@/shared/utils/formatters';
+import { useLanguage } from '@/client/context/LanguageContext';
 
 interface UnifiedResultCardProps {
   listing: UnifiedHealthcareListing;
@@ -36,6 +37,7 @@ export function UnifiedResultCard({
   onSelect,
   onRequestAppointment,
 }: UnifiedResultCardProps) {
+  const { t } = useLanguage();
   const isGoogle = listing.source === 'google_places';
   const isDocNearby = listing.source === 'docnearby';
 
@@ -55,12 +57,12 @@ export function UnifiedResultCard({
           {isDocNearby ? (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-teal-50 text-teal-800 border border-teal-200">
               <span className="w-2 h-2 rounded-full bg-teal-600" />
-              Registered on DocNearby
+              {t.discovery.registeredDocNearby}
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-800 border border-indigo-200">
               <span className="w-2 h-2 rounded-full bg-indigo-500" />
-              Google-listed
+              {t.discovery.googleListed}
             </span>
           )}
 
@@ -71,7 +73,7 @@ export function UnifiedResultCard({
               title={listing.verificationBadge.tooltip}
             >
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              Registration verified
+              {t.discovery.verifiedBadge}
             </span>
           )}
 
@@ -91,7 +93,7 @@ export function UnifiedResultCard({
               title={listing.verificationBadge.tooltip}
             >
               <ShieldAlert className="w-3 h-3 text-slate-400" />
-              Not verified by DocNearby
+              {t.discovery.unverifiedBadge}
             </span>
           )}
 
@@ -149,7 +151,7 @@ export function UnifiedResultCard({
                     : 'bg-rose-100 text-rose-800'
                 }`}
               >
-                {listing.openNow ? 'Open Now' : 'Closed'}
+                {listing.openNow ? t.discovery.openNow : t.discovery.closed}
               </span>
             )}
           </div>
@@ -172,7 +174,7 @@ export function UnifiedResultCard({
         {/* Pricing Block — Strictly Preserving CC-05 */}
         <div className="pt-2 border-t border-slate-100">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-500 font-medium">Consultation Fee:</span>
+            <span className="text-slate-500 font-medium">{t.discovery.feeLabel}:</span>
             {listing.pricing.isAvailable && listing.pricing.amountMinor !== undefined ? (
               <div className="text-right">
                 <span className="font-bold text-slate-900 text-sm">
@@ -184,7 +186,7 @@ export function UnifiedResultCard({
               </div>
             ) : (
               <span className="text-slate-400 italic text-[11px]">
-                {listing.pricing.sourceLabel || 'Fee not available'}
+                {listing.pricing.sourceLabel || t.discovery.feeUnverified}
               </span>
             )}
           </div>
@@ -209,7 +211,7 @@ export function UnifiedResultCard({
               onClick={(e) => e.stopPropagation()}
             >
               <Phone className="w-3.5 h-3.5 text-teal-600" />
-              Call
+              {t.discovery.call}
             </a>
           )}
 
@@ -223,7 +225,7 @@ export function UnifiedResultCard({
               onClick={(e) => e.stopPropagation()}
             >
               <Globe className="w-3.5 h-3.5 text-slate-500" />
-              Web
+              {t.discovery.web}
             </a>
           )}
 
@@ -236,7 +238,7 @@ export function UnifiedResultCard({
             onClick={(e) => e.stopPropagation()}
           >
             <Navigation className="w-3.5 h-3.5 text-teal-600" />
-            Directions
+            {t.discovery.directions}
           </a>
         </div>
 
@@ -248,7 +250,7 @@ export function UnifiedResultCard({
               className="px-3 py-1.5 rounded-lg border border-teal-200 bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-semibold transition-colors"
               onClick={(e) => e.stopPropagation()}
             >
-              Profile
+              {t.discovery.profile}
             </Link>
             <button
               type="button"
@@ -261,16 +263,16 @@ export function UnifiedResultCard({
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-xs transition-colors"
             >
               <CalendarCheck className="w-3.5 h-3.5" />
-              Book Slot
+              {t.discovery.bookSlot}
             </button>
           </div>
         ) : (
           <div
             className="inline-flex items-center gap-1 text-[11px] text-slate-400 py-1"
-            title={listing.booking.reasonUnavailable || 'Direct booking unavailable'}
+            title={listing.booking.reasonUnavailable || t.discovery.directBookingUnavailable}
           >
             <CalendarX className="w-3.5 h-3.5" />
-            <span className="text-[11px]">Direct booking unavailable</span>
+            <span className="text-[11px]">{t.discovery.directBookingUnavailable}</span>
           </div>
         )}
       </div>
