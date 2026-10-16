@@ -19,8 +19,8 @@ Baseline repository audit (CC-00) completed on 2026-10-15. The repository is a *
 |---|---|---|---|
 | CC-00 | Repository audit and baseline | VERIFIED | Read-only audit completed; 10 docs inspected; environment verified (Node v22.21.0, npm 11.12.1, git 2.51.2). Documented in CC-00 report. |
 | CC-01 | Manual search + optional AI filter extraction | VERIFIED | Scaffolding complete; public discovery search page, AI search intent box, manual filters, provider cards, provider details page, demo datasets with clear labels, and Next.js route handlers implemented. 19 unit/integration tests passed; production build passed. |
-| CC-02 | Authentication and authorization | NOT STARTED | Awaiting CC-01 user approval before starting implementation. |
-| CC-03 | Provider directory and verification | NOT STARTED | Awaiting preceding checkpoints. |
+| CC-02 | Authentication and authorization | VERIFIED | Implemented registration, scrypt password hashing, HMAC session tokens, user roles (traveler/provider/admin), saved providers, profile updates, and strict object-level isolation. 34 tests passing; production build verified. |
+| CC-03 | Provider directory and verification | NOT STARTED | Awaiting CC-02 user review and approval before starting. |
 | CC-04 | Maps and location | NOT STARTED | Awaiting preceding checkpoints. |
 | CC-05 | Transparent pricing | NOT STARTED | Awaiting preceding checkpoints. |
 | CC-06 | Appointments and notifications | NOT STARTED | Awaiting preceding checkpoints. |
@@ -132,6 +132,54 @@ Baseline repository audit (CC-00) completed on 2026-10-15. The repository is a *
   - Zero errors reported.
 - **Next.js Production Build (`npm run build`):**
   - Compiled successfully; static and dynamic routes generated (`/`, `/providers/[id]`, `/api/v1/providers`, `/api/v1/providers/[id]`, `/api/v1/ai/search-intent`, `/api/v1/metadata`).
+
+---
+
+## Checkpoint CC-02 Evidence Log (Completed 2026-10-16)
+
+### 1. Implemented Capabilities
+- **Cryptographic Security (`lib/auth/security.ts`):**
+  - Salted password hashing with unique 16-byte random salts via Node.js `scrypt`.
+  - Constant-time password verification via `crypto.timingSafeEqual` preventing timing-attack vectors.
+  - Tamper-proof HMAC-SHA256 session token signing and verification with expiration timestamps.
+- **Session Management (`lib/auth/get-session.ts`):**
+  - Secure `httpOnly`, `sameSite: lax`, `path: /` session cookies (`docnearby_session`) and `Authorization: Bearer <token>` fallback support.
+- **Domain Services & Repository (`lib/repositories/user-repository.ts`, `lib/services/auth-service.ts`):**
+  - User registration with duplicate email rejection and password complexity validation (min 8 characters, letters & numbers).
+  - User authentication and login credential verification.
+  - Role-based separation (`traveler`, `provider`, `admin`).
+  - Saved providers ("Favorites") repository with automatic provider snapshot storage.
+  - **Strict Object-Level Authorization:** Saved providers are queried and deleted with explicit user ownership enforcement (`userId === record.userId`). User A cannot access or delete User B's saved providers.
+- **API Route Handlers:**
+  - `POST /api/v1/auth/register`: Account registration with automatic cookie issuance.
+  - `POST /api/v1/auth/login`: Credential validation and session token cookie setting.
+  - `POST /api/v1/auth/logout`: Safe cookie invalidation.
+  - `GET /api/v1/auth/me`: Safe current user profile retrieval.
+  - `PATCH /api/v1/user/profile`: Protected profile preferences update.
+  - `GET /api/v1/user/saved-providers`: Protected user-specific saved providers list.
+  - `POST /api/v1/user/saved-providers`: Protected provider bookmarking.
+  - `DELETE /api/v1/user/saved-providers/[id]`: Protected unbookmarking with object-level ownership check.
+- **Client Interfaces:**
+  - `app/login/page.tsx`: Accessible sign-in form with error handling and redirect to account.
+  - `app/register/page.tsx`: Account creation form with language preferences.
+  - `app/account/page.tsx`: Tabbed account portal displaying saved providers with deletion controls, profile settings, and sign-out.
+  - `components/layout/Header.tsx`: Dynamic session state displaying user avatar and account link when logged in, or Sign In / Register when unauthenticated.
+  - `components/providers/SaveProviderButton.tsx`: Interactive bookmarking button integrated on provider cards and details views.
+- **Public Discovery Integrity:**
+  - Public provider search remains 100% accessible to all users without requiring login or registration.
+
+### 2. Actual Test & Build Results
+- **Vitest Unit/Integration Tests (`npm test`):**
+  - `tests/object-level-auth.test.ts` (6 tests) — PASSED (Verifies cross-user isolation and tampering prevention).
+  - `tests/auth-service.test.ts` (9 tests) — PASSED (Verifies password hashing, tampered token rejection, registration, and login).
+  - `tests/ai-search-service.test.ts` (4 tests) — PASSED
+  - `tests/provider-service.test.ts` (11 tests) — PASSED
+  - `tests/utils.test.ts` (4 tests) — PASSED
+  - **Total:** 34 passed across 5 test suites in 4.62s.
+- **TypeScript Strict Check (`npm run typecheck`):**
+  - Clean compilation with 0 errors.
+- **Next.js Production Build (`npm run build`):**
+  - Compiled successfully; 16 static and dynamic routes generated including all new auth routes and account pages.
 
 ---
 

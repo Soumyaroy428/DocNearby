@@ -21,11 +21,11 @@
 - [x] Tests and docs updated; report and wait.
 
 ## CC-02 — Authentication and authorization
-- [ ] Registration/login/session flow if in approved scope.
-- [ ] Roles and protected routes.
-- [ ] Object-level authorization tests.
-- [ ] Account privacy controls.
-- [ ] Report and wait.
+- [x] Registration/login/session flow if in approved scope.
+- [x] Roles and protected routes.
+- [x] Object-level authorization tests.
+- [x] Account privacy controls.
+- [x] Report and wait.
 
 ## CC-03 — Provider directory and verification
 - [ ] Provider/facility/service data model and validation.

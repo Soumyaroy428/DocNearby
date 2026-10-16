@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Provider } from '@/lib/types/provider';
 import { formatPaiseToRupees, formatDate, getVerificationBadge, getPriceTypeBadge } from '@/lib/utils';
+import { SaveProviderButton } from '@/components/providers/SaveProviderButton';
 
 interface ProviderDetailsViewProps {
   provider: Provider;
@@ -125,6 +126,9 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
                   Clinic Website
                 </a>
               )}
+            </div>
+            <div className="pt-3 mt-3 border-t border-slate-200">
+              <SaveProviderButton providerId={provider.id} variant="details" />
             </div>
           </div>
         </div>

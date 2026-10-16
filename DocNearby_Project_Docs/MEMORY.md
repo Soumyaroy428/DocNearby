@@ -37,8 +37,9 @@ This file records durable project decisions. Update it only when a decision is c
 
 ## Current checkpoint
 - `CC-00 — Repository Audit and Baseline`: VERIFIED.
-- `CC-01 — Simple Manual + AI Healthcare Discovery`: VERIFIED and completed with passing unit/integration tests and production build.
-- Implementation state: Fully verified and awaiting user review before CC-02.
+- `CC-01 — Simple Manual + AI Healthcare Discovery`: VERIFIED and deployed.
+- `CC-02 — Authentication and Authorization`: VERIFIED (Registration, login, sessions, roles, saved providers, object-level isolation; 34 passing tests).
+- Implementation state: Fully verified and awaiting user review before CC-03.
 
 ## Update policy
 When a decision changes, record date, decision, reason, and affected documents. Never rewrite an unverified assumption as a confirmed fact.

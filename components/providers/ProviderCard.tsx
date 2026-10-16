@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { MapPin, Languages, CheckCircle2, AlertCircle, Clock, ShieldCheck, ChevronRight, IndianRupee } from 'lucide-react';
 import { Provider } from '@/lib/types/provider';
 import { formatPaiseToRupees, formatDate, getVerificationBadge, getPriceTypeBadge } from '@/lib/utils';
+import { SaveProviderButton } from '@/components/providers/SaveProviderButton';
 
 interface ProviderCardProps {
   provider: Provider;
@@ -39,9 +40,12 @@ export function ProviderCard({ provider }: ProviderCardProps) {
             )}
           </div>
 
-          <span className="text-xs text-slate-500 capitalize">
-            {provider.providerType.replace('_', ' ')}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-slate-500 capitalize">
+              {provider.providerType.replace('_', ' ')}
+            </span>
+            <SaveProviderButton providerId={provider.id} />
+          </div>
         </div>
 
         {/* Provider Title & Specialties */}
