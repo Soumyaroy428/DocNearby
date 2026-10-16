@@ -66,3 +66,4 @@ Checkpoint CC-09 solidifies DocNearby's transition from feature development to a
 
 - **Unit, Integration, and Smoke Tests:** Automated suite verifies health monitoring payloads, security configurations, legal policy compliance, and core platform invariants.
 - **Build Verification:** Next.js production build cleanly compiles all static and dynamic routes.
+

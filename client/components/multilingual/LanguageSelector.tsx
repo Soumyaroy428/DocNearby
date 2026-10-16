@@ -1,13 +1,58 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Languages, BookOpen } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 import { SUPPORTED_LANGUAGES, SupportedLanguage } from '@/shared/types/multilingual';
 import { TravelerPhrasebookModal } from './TravelerPhrasebookModal';
 
-export function LanguageSelector() {
+interface LanguageSelectorProps {
+  fullWidth?: boolean;
+}
+
+export function LanguageSelector({ fullWidth = false }: LanguageSelectorProps) {
   const [selectedLang, setSelectedLang] = useState<SupportedLanguage>('en');
   const [isPhrasebookOpen, setIsPhrasebookOpen] = useState<boolean>(false);
+
+  if (fullWidth) {
+    return (
+      <>
+        <div className="space-y-2 w-full">
+          {/* Full width language segment selector */}
+          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 w-full">
+            {SUPPORTED_LANGUAGES.map((lang) => (
+              <button
+                key={lang.code}
+                type="button"
+                onClick={() => setSelectedLang(lang.code)}
+                className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-colors text-center ${
+                  selectedLang === lang.code
+                    ? 'bg-white text-slate-900 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+                title={`Switch to ${lang.label}`}
+              >
+                {lang.nativeLabel}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsPhrasebookOpen(true)}
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-semibold border border-teal-200 transition-colors"
+          >
+            <BookOpen className="w-4 h-4 text-teal-600" />
+            <span>Open Medical Travel Phrasebook</span>
+          </button>
+        </div>
+
+        <TravelerPhrasebookModal
+          isOpen={isPhrasebookOpen}
+          onClose={() => setIsPhrasebookOpen(false)}
+        />
+      </>
+    );
+  }
 
   return (
     <>
@@ -27,6 +72,7 @@ export function LanguageSelector() {
             {SUPPORTED_LANGUAGES.map((lang) => (
               <button
                 key={lang.code}
+                type="button"
                 onClick={() => setSelectedLang(lang.code)}
                 className={`px-2 py-0.5 rounded text-[11px] font-bold transition-colors ${
                   selectedLang === lang.code
@@ -49,4 +95,3 @@ export function LanguageSelector() {
     </>
   );
 }
-

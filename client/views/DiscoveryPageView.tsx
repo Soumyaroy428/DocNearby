@@ -319,11 +319,11 @@ export function DiscoveryPageView() {
 
           {/* View Mode Toggle: Split / Cards / Map */}
           <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
               <button
                 type="button"
                 onClick={() => setViewMode('split')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 ${
+                className={`hidden md:flex px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors items-center gap-1 ${
                   viewMode === 'split'
                     ? 'bg-white text-slate-900 shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -336,7 +336,7 @@ export function DiscoveryPageView() {
               <button
                 type="button"
                 onClick={() => setViewMode('cards')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 ${
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 ${
                   viewMode === 'cards'
                     ? 'bg-white text-slate-900 shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -349,7 +349,7 @@ export function DiscoveryPageView() {
               <button
                 type="button"
                 onClick={() => setViewMode('map')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 ${
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 ${
                   viewMode === 'map'
                     ? 'bg-white text-slate-900 shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900'

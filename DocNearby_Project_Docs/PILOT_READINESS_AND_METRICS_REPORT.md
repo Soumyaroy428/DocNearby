@@ -60,3 +60,4 @@ DocNearby's initial rollout is strictly bounded to the metropolitan territory of
 ## 4. Operational Sign-Off
 
 The DocNearby platform satisfies all architectural, clinical safety, data protection, and operational requirements for single-city deployment in Kolkata, India.
+

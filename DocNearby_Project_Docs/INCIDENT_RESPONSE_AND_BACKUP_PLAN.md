@@ -90,3 +90,4 @@ Following any Sev-1 or Sev-2 incident, the engineering team must publish an RCA 
 2. **Root Cause:** Technical failure mechanism (code bug, third-party outage, config drift).
 3. **Impact:** Number of affected traveler sessions or appointment requests.
 4. **Corrective & Preventive Actions:** Pull requests, architectural improvements, or test additions to permanently prevent recurrence.
+

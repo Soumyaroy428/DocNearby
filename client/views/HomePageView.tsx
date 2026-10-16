@@ -182,13 +182,13 @@ export function HomePageView() {
       </div>
 
       {/* Google Maps Discovery Feature Banner */}
-      <div className="bg-gradient-to-r from-teal-50 via-slate-50 to-indigo-50 border border-teal-200/80 rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
-        <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-teal-600 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
-            <Compass className="w-6 h-6" />
+      <div className="bg-gradient-to-r from-teal-50 via-slate-50 to-indigo-50 border border-teal-200/80 rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
+        <div className="flex items-start sm:items-center gap-3.5">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-teal-600 text-white flex items-center justify-center flex-shrink-0 shadow-xs mt-0.5 sm:mt-0">
+            <Compass className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <h3 className="text-sm font-bold text-slate-900 flex flex-wrap items-center gap-1.5 sm:gap-2">
               Interactive Google Maps &amp; Healthcare Places Discovery
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
                 New
@@ -201,7 +201,7 @@ export function HomePageView() {
         </div>
         <Link
           href="/discovery"
-          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-xs transition-colors flex-shrink-0"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-xs transition-colors flex-shrink-0 text-center"
         >
           <Navigation className="w-3.5 h-3.5" />
           Open Map Discovery

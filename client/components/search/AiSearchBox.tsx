@@ -102,7 +102,7 @@ export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps)
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <h2 className="text-sm font-bold text-slate-900 flex flex-wrap items-center gap-1.5 sm:gap-2">
               Natural Language Healthcare Assistant
               <span className="text-[10px] font-semibold text-teal-800 bg-teal-100/80 px-2 py-0.5 rounded-full">
                 Multilingual (EN • HI • BN)
@@ -149,7 +149,7 @@ export function AiSearchBox({ onFiltersExtracted, onClearAi }: AiSearchBoxProps)
           <button
             type="submit"
             disabled={isLoading || !prompt.trim()}
-            className="flex-shrink-0 inline-flex items-center gap-1.5 px-5 py-2.5 bg-teal-600 text-white text-xs sm:text-sm font-semibold rounded-2xl hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-xs"
+            className="flex-shrink-0 inline-flex items-center gap-1.5 px-3.5 sm:px-5 py-2.5 bg-teal-600 text-white text-xs sm:text-sm font-semibold rounded-2xl hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-xs"
           >
             {isLoading ? (
               <>
