@@ -446,6 +446,43 @@ Baseline repository audit (CC-00) completed on 2026-10-15. The repository is a *
 
 ---
 
+## Checkpoint CC-08 Evidence Log (Completed 2026-10-16)
+
+### 1. Implemented Capabilities
+- **Strict Statutory Verification Separation:**
+  - Patient reviews reflect subjective traveler communication and clinic experiences; reviews never modify or influence official medical council credential verification (`verificationStatus`).
+  - Clear medical disclaimers prominently rendered across the provider details view and review submission dialogs.
+- **Review Submission & Aggregation (`server/services/review-service.ts`, `server/repositories/review-repository.ts`):**
+  - Ratings (1–5 stars), headline, and detailed feedback with live character validation (min 10, max 1000).
+  - Specialized traveler sub-metrics: clinic wait time (minutes), spoken language satisfaction (1–5), clinic hygiene/cleanliness (1–5), approximate visit date (YYYY-MM), and consultation fee accuracy check.
+  - Aggregate rating calculation: average score, star distribution, average wait time, and price accuracy percentage.
+- **Abuse Prevention & Anti-Spam Controls:**
+  - Duplicate Prevention: Enforces a maximum of 1 active review per provider per user within a 30-day window (`findRecentUserReviewForProvider`).
+  - Self-Review Prohibition: Healthcare providers cannot review their own practice profile (`provider.userId === user.id`).
+  - Hourly Rate Limiter: Maximum 3 review submissions per hour per user across any facilities.
+  - Automated Pre-moderation & PII Shielding: Screened via `PrivacyScrubber` and language filter; reviews with phone numbers, emails, cards, IDs, or harassment are automatically held in `pending_moderation`.
+- **Verified Patient Stamping (CC-06 Integration):**
+  - Cross-references user ID and provider ID in `appointmentRepository` for completed or confirmed consultations, granting a verified patient badge.
+- **Provider Official Responses & Community Flagging:**
+  - Authorized healthcare providers can post official responses to reviews on their facility profile.
+  - Community reporting flag workflow allows patients to report fake reviews, harassment, or PII leaks.
+- **Provider Profile Correction Workflow:**
+  - Structured error reporting for operating hours, clinic address/locality, reception phone, qualifications, or inactive provider status.
+  - Compliance administration review queue for verifying and resolving reported discrepancies.
+- **Trust & Moderation Dashboard (`/admin/reviews`):**
+  - Admin view with dedicated tabs for review moderation (Publish/Hide/Reject) and provider profile corrections (Resolve/Dismiss with audit notes).
+
+### 2. Actual Test & Build Results
+- **Vitest Unit/Integration Tests (`npm test`):**
+  - `tests/reviews-and-trust.test.ts` (16 tests) — PASSED
+  - All 12 test suites passed: **141/141 tests passed** (100% passing).
+- **TypeScript Strict Check (`npm run typecheck`):**
+  - Zero errors reported (`tsc --noEmit` clean exit code 0).
+- **Next.js Production Build (`npm run build`):**
+  - Compiled successfully; **31 static and dynamic routes** generated cleanly including `/admin/reviews` and all review/correction API endpoints.
+
+---
+
 ## Required evidence for each update
 Record:
 - Date and checkpoint
@@ -458,6 +495,7 @@ Record:
 - Deployment/push authorization if relevant
 
 Never mark a feature `VERIFIED` based solely on code generation or an AI agent's assertion.
+
 
 
 

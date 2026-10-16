@@ -3,6 +3,7 @@ import { Provider } from '@/shared/types/provider';
 export const DEMO_PROVIDERS: Provider[] = [
   {
     id: 'demo-prov-001',
+    userId: 'user-prov-001',
     displayName: 'Demo Dr. Ananya Mukherjee',
     providerType: 'doctor',
     specialties: ['Dermatology', 'Cosmetology'],

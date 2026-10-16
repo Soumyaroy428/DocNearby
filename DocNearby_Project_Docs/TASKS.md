@@ -81,11 +81,11 @@
 - [x] Report and wait.
 
 ## CC-08 — Reviews and trust
-- [ ] Review submission and moderation.
-- [ ] Reporting and provider correction workflow.
-- [ ] Abuse and duplicate controls.
-- [ ] Separate reviews from credential verification.
-- [ ] Report and wait.
+- [x] Review submission and moderation.
+- [x] Reporting and provider correction workflow.
+- [x] Abuse and duplicate controls.
+- [x] Separate reviews from credential verification.
+- [x] Report and wait.
 
 ## CC-09 — Production readiness and pilot
 - [ ] Security and dependency audit.

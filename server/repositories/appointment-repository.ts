@@ -3,7 +3,7 @@ import {
   AppointmentStatus,
   NotificationLog,
 } from '@/shared/types/appointment';
-import { getMongoDb } from '@/server/db/mongodb';
+import { getMongoDb, isMongoConfigured } from '@/server/db/mongodb';
 
 export interface IAppointmentRepository {
   createAppointment(
@@ -388,3 +388,7 @@ export class MongoAppointmentRepository implements IAppointmentRepository {
     }
   }
 }
+
+export const appointmentRepository: IAppointmentRepository = isMongoConfigured()
+  ? new MongoAppointmentRepository()
+  : new MemoryAppointmentRepository();

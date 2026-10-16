@@ -94,3 +94,4 @@ All 125 tests across all 11 test suites passed:
 | `client/components/multilingual/LanguageSelector.tsx` | Header language selector and phrasebook launcher |
 | `client/components/search/AiSearchBox.tsx` | Enhanced search box with emergency alerts, clinical disclaimers, and PII badges |
 | `tests/ai-multilingual-assistance.test.ts` | 18 automated integration tests |
+

@@ -216,3 +216,4 @@ Strict rules:
 }
 
 export const multilingualService = new MultilingualService();
+

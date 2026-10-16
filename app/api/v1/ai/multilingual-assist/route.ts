@@ -4,3 +4,4 @@ import { handlePostAiMultilingualAssist } from '@/server/api/ai-multilingual-ass
 export async function POST(request: NextRequest) {
   return handlePostAiMultilingualAssist(request);
 }
+

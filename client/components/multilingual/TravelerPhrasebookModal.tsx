@@ -252,3 +252,4 @@ export function TravelerPhrasebookModal({ isOpen, onClose }: TravelerPhrasebookM
     </div>
   );
 }
+

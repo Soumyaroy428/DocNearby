@@ -57,6 +57,7 @@ export interface PrivateVerificationRecord {
 
 export interface Provider {
   id: string;
+  userId?: string; // Linked provider user account
   displayName: string;
   providerType: ProviderType;
   specialties: string[];

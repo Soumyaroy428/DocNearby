@@ -65,3 +65,4 @@ export class SlidingWindowRateLimiter {
 }
 
 export const aiRateLimiter = new SlidingWindowRateLimiter(10, 60 * 1000); // 10 requests / minute
+

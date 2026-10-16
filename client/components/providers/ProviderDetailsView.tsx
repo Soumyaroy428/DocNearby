@@ -29,6 +29,7 @@ import { SaveProviderButton } from '@/client/components/providers/SaveProviderBu
 import { FacilityMap } from '@/client/components/maps/FacilityMap';
 import { PriceReportModal } from '@/client/components/pricing/PriceReportModal';
 import { BookAppointmentModal } from '@/client/components/appointments/BookAppointmentModal';
+import { ProviderReviewsSection } from '@/client/components/reviews/ProviderReviewsSection';
 
 interface ProviderDetailsViewProps {
   provider: Provider;
@@ -366,6 +367,11 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
           </span>
         </div>
       </div>
+
+      <ProviderReviewsSection
+        providerId={provider.id}
+        providerName={provider.displayName}
+      />
 
       <PriceReportModal
         provider={provider}
