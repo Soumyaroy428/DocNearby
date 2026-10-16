@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { HeartPulse, AlertCircle, Search, ShieldCheck, User, Stethoscope, ShieldAlert, Scale, Calendar } from 'lucide-react';
+import { HeartPulse, AlertCircle, Search, ShieldCheck, User, Stethoscope, ShieldAlert, Scale, Calendar, Compass } from 'lucide-react';
 import { UserPublicProfile } from '@/shared/types/auth';
 
 export function Header() {
@@ -61,6 +61,15 @@ export function Header() {
             >
               <Search className="w-4 h-4 text-slate-500" />
               <span>Find Care</span>
+            </Link>
+
+            <Link
+              href="/discovery"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-teal-700 hover:bg-teal-50 transition-colors font-semibold"
+              title="Interactive Google Maps & Places Discovery"
+            >
+              <Compass className="w-4 h-4 text-teal-600" />
+              <span>Map Discovery</span>
             </Link>
 
             <Link

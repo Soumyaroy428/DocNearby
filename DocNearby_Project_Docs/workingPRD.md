@@ -367,6 +367,45 @@ Baseline repository audit (CC-00) completed on 2026-10-15. The repository is a *
 
 ---
 
+## Google Maps & Google Places Healthcare Discovery Evidence Log (Completed 2026-10-16)
+
+### 1. Implemented Capabilities
+- **Google Places API (New) Client (`server/services/google-places-service.ts`):**
+  - Integrated official modern Places API with explicit field masks: `places.id,places.displayName,places.formattedAddress,places.location,places.nationalPhoneNumber,places.websiteUri,places.regularOpeningHours,places.rating,places.userRatingCount,places.types,places.googleMapsUri`.
+  - In-memory cache with 10-minute TTL for repeated location and query searches.
+  - AbortController timeout protection (5000ms).
+  - Robust sanitization stripping `<script>`, `<style>`, and HTML control characters from external listings.
+  - Built-in graceful degradation: returns structured `{ status: 'unconfigured' | 'unavailable' | 'error', places: [] }` without unhandled crashes.
+- **Unified Healthcare Discovery Service (`server/services/unified-search-service.ts`):**
+  - Parallel discovery across DocNearby MongoDB and Google Places using `Promise.allSettled()`.
+  - Normalizes results into standardized `UnifiedHealthcareListing`.
+  - Computes geodetic Haversine distances when coordinates are provided; enforces bounded radius filtering (0.5 to 50 km).
+  - Fault isolation: Google Places API outages never impact DocNearby provider discovery; MongoDB issues never block Google Places discovery.
+- **Strict Invariants Preserved:**
+  - **Source Attribution:** Unambiguous distinction between `"Registered on DocNearby"` (Teal) and `"Google-listed"` (Indigo).
+  - **Verification Separation:** External Google listings strictly assigned `"not_verified_by_docnearby"` with clear explanatory tooltips.
+  - **Booking Invariant (CC-06):** External Google listings have `booking.isAvailable = false`; attempting to create an appointment against a Google Place ID alone is rejected on the server.
+  - **Transparent Pricing (CC-05):** Confirmed fees displayed for DocNearby providers; Google Places listings display `"Fee not verified by DocNearby"` with zero fabricated fees.
+- **Client Components & Dedicated Discovery Page:**
+  - `client/components/maps/GoogleDiscoveryMap.tsx`: Responsive interactive map with custom dual-source markers (Teal/Indigo), InfoWindow popovers, "Fit All" bounds button, and seamless fallback to OpenStreetMap if client API key is unconfigured.
+  - `client/components/discovery/UnifiedResultCard.tsx`: Unified result card displaying source badges, verification badges, transparent pricing, directions link, and direct slot booking for DocNearby providers.
+  - `client/views/DiscoveryPageView.tsx` & `/discovery`: Full discovery page with GPS geolocation ("Near Me"), radius selection, source filters, sorting controls, responsive layout toggle (Split View / Cards / Map), and CC-06 appointment modal integration.
+  - Navigation updates: Added "Map Discovery" link to `Header.tsx` and feature banner on `HomePageView.tsx`.
+- **Zod Validation & Route Handler:**
+  - `server/validation/unified-search.ts`: Validates `latitude`, `longitude`, `radiusKm` (0.5..50), `source`, `sortBy`, `limit`.
+  - `app/api/v1/search/places/route.ts`: Thin route handler returning unified JSON payload.
+
+### 2. Actual Test & Build Results
+- **Vitest Unit/Integration Tests (`npm test`):**
+  - `tests/google-places-integration.test.ts` (17 tests) — PASSED (Covers coordinate validation, radius bounds, query limits, Places adapter, sanitization, in-memory caching, unified search combining sources, source ID preservation, verification separation, booking invariant, pricing invariant, appointment guard against Google Place IDs, and independent fault isolation).
+  - All 10 test suites passed: **107/107 tests passed** (100% passing).
+- **TypeScript Strict Check (`npm run typecheck`):**
+  - Zero errors reported (`tsc --noEmit` clean exit code 0).
+- **Next.js Production Build (`npm run build`):**
+  - Compiled successfully; **26 static and dynamic routes** generated cleanly including `/discovery` and `/api/v1/search/places`.
+
+---
+
 ## Required evidence for each update
 Record:
 - Date and checkpoint

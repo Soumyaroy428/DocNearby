@@ -57,6 +57,21 @@
 - [x] Prevent request/confirmation confusion.
 - [x] Report and wait.
 
+## Google Maps & Google Places Healthcare Discovery Integration
+- [x] Official Google Places API adapter with explicit field masks and timeout protection.
+- [x] In-memory caching for repeated location/places queries (10-minute TTL).
+- [x] Input validation for coordinates (-90..90, -180..180) and search radius (0.5..50km).
+- [x] Unified healthcare discovery service combining MongoDB providers with Google Places.
+- [x] Source attribution separation: "Registered on DocNearby" vs "Google-listed".
+- [x] Medical verification separation: "Registration verified" vs "Not verified by DocNearby".
+- [x] Strict Booking Invariant: Direct appointment booking disabled for external Google Places listings.
+- [x] Strict Pricing Invariant: External Google listings display "Fee not verified by DocNearby".
+- [x] Fault isolation: Google Places API failure does not break DocNearby MongoDB search and vice versa.
+- [x] Interactive Google Maps component with custom dual-source markers (Teal/Indigo) and OpenStreetMap fallback.
+- [x] Dedicated discovery view (`/discovery`) with responsive split/cards/map views.
+- [x] Comprehensive automated Vitest integration test suite (17/17 tests passed; 107/107 total).
+- [x] Documentation and completion report; stop and wait for review.
+
 ## CC-07 — AI and multilingual assistance
 - [ ] Provider-independent AI adapter.
 - [ ] Structured output validation and safe fallback.

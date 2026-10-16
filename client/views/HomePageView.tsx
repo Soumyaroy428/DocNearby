@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, AlertCircle, RefreshCw, Shield, LayoutGrid, Map as MapIcon } from 'lucide-react';
+import Link from 'next/link';
+import { Search, AlertCircle, RefreshCw, Shield, LayoutGrid, Map as MapIcon, Compass, Navigation } from 'lucide-react';
 import { Provider, SearchFilters, PaginatedResult } from '@/shared/types/provider';
 import { ValidatedAiSearchIntent } from '@/server/validation/search';
 import { AiSearchBox } from '@/client/components/search/AiSearchBox';
@@ -178,6 +179,33 @@ export function HomePageView() {
         <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
           Search local doctors, clinics, and diagnostic facilities with transparent consultation pricing, language compatibility, and verified regulatory registrations in unfamiliar cities.
         </p>
+      </div>
+
+      {/* Google Maps Discovery Feature Banner */}
+      <div className="bg-gradient-to-r from-teal-50 via-slate-50 to-indigo-50 border border-teal-200/80 rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-teal-600 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
+            <Compass className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              Interactive Google Maps &amp; Healthcare Places Discovery
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
+                New
+              </span>
+            </h3>
+            <p className="text-xs text-slate-600 mt-0.5">
+              Explore publicly listed clinics &amp; hospitals on Google Maps combined with DocNearby-verified doctors and transparent fees.
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/discovery"
+          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-xs transition-colors flex-shrink-0"
+        >
+          <Navigation className="w-3.5 h-3.5" />
+          Open Map Discovery
+        </Link>
       </div>
 
       {/* AI Assistant Search Box */}
