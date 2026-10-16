@@ -44,11 +44,11 @@
 - [x] Report and wait.
 
 ## CC-05 — Transparent pricing
-- [ ] Currency, amount, price type, source, and timestamp.
-- [ ] Confirmed/estimate/starting/not-provided labels.
-- [ ] Stale price indicators and correction workflow.
-- [ ] Filter and comparison tests.
-- [ ] Report and wait.
+- [x] Currency, amount, price type, source, and timestamp.
+- [x] Confirmed/estimate/starting/not-provided labels.
+- [x] Stale price indicators and correction workflow.
+- [x] Filter and comparison tests.
+- [x] Report and wait.
 
 ## CC-06 — Appointments and notifications
 - [ ] Appointment request and confirmation states.

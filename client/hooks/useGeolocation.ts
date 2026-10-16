@@ -92,3 +92,4 @@ export function useGeolocation(): UseGeolocationReturn {
     clearLocation,
   };
 }
+

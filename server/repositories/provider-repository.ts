@@ -4,6 +4,9 @@ import {
   PaginatedResult,
   ProviderSubmission,
   SubmissionStatus,
+  PriceCorrectionReport,
+  PriceCorrectionStatus,
+  ServicePrice,
 } from '@/shared/types/provider';
 import { DEMO_PROVIDERS } from '@/server/data/mock-providers';
 import { getMongoDb, isMongoConfigured } from '@/server/db/mongodb';
@@ -20,6 +23,25 @@ export interface IProviderRepository {
   getSubmissions(status?: SubmissionStatus): Promise<ProviderSubmission[]>;
   getSubmissionById(id: string): Promise<ProviderSubmission | null>;
   updateSubmission(id: string, updates: Partial<ProviderSubmission>): Promise<ProviderSubmission | null>;
+  createPriceReport(
+    report: Omit<PriceCorrectionReport, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<PriceCorrectionReport>;
+  getPriceReports(status?: PriceCorrectionStatus): Promise<PriceCorrectionReport[]>;
+  getPriceReportById(id: string): Promise<PriceCorrectionReport | null>;
+  resolvePriceReport(
+    reportId: string,
+    action: {
+      decision: 'accepted' | 'dismissed';
+      reviewNotes: string;
+      reviewedByUserId: string;
+      updateProviderPrice?: boolean;
+    }
+  ): Promise<PriceCorrectionReport | null>;
+  updateServicePrice(
+    providerId: string,
+    serviceId: string,
+    updates: Partial<ServicePrice>
+  ): Promise<Provider | null>;
   getSpecialties(): Promise<string[]>;
   getCities(): Promise<string[]>;
   getLanguages(): Promise<string[]>;
@@ -28,6 +50,7 @@ export interface IProviderRepository {
 export class MemoryProviderRepository implements IProviderRepository {
   private providers: Provider[];
   private submissions: ProviderSubmission[];
+  private priceReports: PriceCorrectionReport[];
 
   constructor() {
     // Initialize providers with deep copy to avoid mutation across tests
@@ -87,6 +110,26 @@ export class MemoryProviderRepository implements IProviderRepository {
         reviewedAt: '2026-08-15T12:00:00Z',
         createdAt: '2026-08-10T10:00:00Z',
         updatedAt: '2026-08-15T12:00:00Z',
+      },
+    ];
+
+    // Seed initial demonstration price correction report
+    this.priceReports = [
+      {
+        id: 'prep-001',
+        providerId: 'demo-prov-003',
+        providerName: 'Demo Bengal Heart & Diagnostic Center',
+        serviceId: 'demo-srv-004',
+        serviceName: 'Cardiology Specialist Consultation',
+        listedAmountMinor: 120000,
+        reportedAmountMinor: 140000,
+        currency: 'INR',
+        observedDate: '2026-10-14',
+        evidenceOrReceiptNotes: 'Senior consultant fee was revised from ₹1,200 to ₹1,400 effective October 1st as confirmed on reception billing receipt.',
+        reporterEmail: 'traveler@example.com',
+        status: 'pending_review',
+        createdAt: '2026-10-15T09:30:00Z',
+        updatedAt: '2026-10-15T09:30:00Z',
       },
     ];
   }
@@ -336,6 +379,109 @@ export class MemoryProviderRepository implements IProviderRepository {
       updatedAt: new Date().toISOString(),
     };
     return { ...this.submissions[index] };
+  }
+
+  // --- CC-05: Price Correction Reports & Updates ---
+
+  async createPriceReport(
+    report: Omit<PriceCorrectionReport, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<PriceCorrectionReport> {
+    const id = `prep-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    const now = new Date().toISOString();
+    const newReport: PriceCorrectionReport = {
+      ...report,
+      id,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.priceReports.push(newReport);
+    return { ...newReport };
+  }
+
+  async getPriceReports(status?: PriceCorrectionStatus): Promise<PriceCorrectionReport[]> {
+    if (status) {
+      return this.priceReports
+        .filter((r) => r.status === status)
+        .map((r) => ({ ...r }));
+    }
+    return this.priceReports.map((r) => ({ ...r }));
+  }
+
+  async getPriceReportById(id: string): Promise<PriceCorrectionReport | null> {
+    const report = this.priceReports.find((r) => r.id === id);
+    return report ? { ...report } : null;
+  }
+
+  async resolvePriceReport(
+    reportId: string,
+    action: {
+      decision: 'accepted' | 'dismissed';
+      reviewNotes: string;
+      reviewedByUserId: string;
+      updateProviderPrice?: boolean;
+    }
+  ): Promise<PriceCorrectionReport | null> {
+    const index = this.priceReports.findIndex((r) => r.id === reportId);
+    if (index === -1) return null;
+
+    const now = new Date().toISOString();
+    this.priceReports[index] = {
+      ...this.priceReports[index],
+      status: action.decision,
+      reviewNotes: action.reviewNotes,
+      reviewedByUserId: action.reviewedByUserId,
+      reviewedAt: now,
+      updatedAt: now,
+    };
+
+    const resolved = { ...this.priceReports[index] };
+
+    // If accepted and updateProviderPrice is true, update the provider's corresponding service
+    if (action.decision === 'accepted' && action.updateProviderPrice) {
+      const provider = this.providers.find((p) => p.id === resolved.providerId);
+      if (provider) {
+        const sIndex = provider.services.findIndex(
+          (s) =>
+            (resolved.serviceId && s.id === resolved.serviceId) ||
+            s.serviceName.toLowerCase() === resolved.serviceName?.toLowerCase()
+        );
+
+        if (sIndex !== -1) {
+          provider.services[sIndex] = {
+            ...provider.services[sIndex],
+            amountMinor: resolved.reportedAmountMinor,
+            lastConfirmedAt: now,
+            sourceType: 'patient_reported_community',
+            notes: `Updated via verified patient price report: ${resolved.evidenceOrReceiptNotes}`,
+          };
+          provider.updatedAt = now;
+        }
+      }
+    }
+
+    return resolved;
+  }
+
+  async updateServicePrice(
+    providerId: string,
+    serviceId: string,
+    updates: Partial<ServicePrice>
+  ): Promise<Provider | null> {
+    const pIndex = this.providers.findIndex((p) => p.id === providerId);
+    if (pIndex === -1) return null;
+
+    const sIndex = this.providers[pIndex].services.findIndex((s) => s.id === serviceId);
+    if (sIndex === -1) return null;
+
+    const now = new Date().toISOString();
+    this.providers[pIndex].services[sIndex] = {
+      ...this.providers[pIndex].services[sIndex],
+      ...updates,
+      lastConfirmedAt: updates.lastConfirmedAt || now,
+    };
+    this.providers[pIndex].updatedAt = now;
+
+    return { ...this.providers[pIndex] };
   }
 
   async getSpecialties(): Promise<string[]> {
@@ -634,6 +780,132 @@ export class MongoProviderRepository implements IProviderRepository {
       return this.getSubmissionById(id);
     } catch {
       return this.fallback.updateSubmission(id, updates);
+    }
+  }
+
+  // --- CC-05: Price Correction Reports & Updates ---
+
+  async createPriceReport(
+    report: Omit<PriceCorrectionReport, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<PriceCorrectionReport> {
+    const db = await this.getDb();
+    if (!db) return this.fallback.createPriceReport(report);
+
+    const id = `prep-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    const now = new Date().toISOString();
+    const newReport: PriceCorrectionReport = {
+      ...report,
+      id,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    try {
+      await db.collection('price_reports').insertOne({ ...newReport });
+      return { ...newReport };
+    } catch {
+      return this.fallback.createPriceReport(report);
+    }
+  }
+
+  async getPriceReports(status?: PriceCorrectionStatus): Promise<PriceCorrectionReport[]> {
+    const db = await this.getDb();
+    if (!db) return this.fallback.getPriceReports(status);
+
+    try {
+      const query = status ? { status } : {};
+      const reports = await db
+        .collection<PriceCorrectionReport>('price_reports')
+        .find(query)
+        .sort({ createdAt: -1 })
+        .toArray();
+      return reports.map((r: PriceCorrectionReport) => ({ ...r }));
+    } catch {
+      return this.fallback.getPriceReports(status);
+    }
+  }
+
+  async getPriceReportById(id: string): Promise<PriceCorrectionReport | null> {
+    const db = await this.getDb();
+    if (!db) return this.fallback.getPriceReportById(id);
+
+    try {
+      const report = await db.collection<PriceCorrectionReport>('price_reports').findOne({ id });
+      return report ? { ...report } : this.fallback.getPriceReportById(id);
+    } catch {
+      return this.fallback.getPriceReportById(id);
+    }
+  }
+
+  async resolvePriceReport(
+    reportId: string,
+    action: {
+      decision: 'accepted' | 'dismissed';
+      reviewNotes: string;
+      reviewedByUserId: string;
+      updateProviderPrice?: boolean;
+    }
+  ): Promise<PriceCorrectionReport | null> {
+    const db = await this.getDb();
+    if (!db) return this.fallback.resolvePriceReport(reportId, action);
+
+    try {
+      const now = new Date().toISOString();
+      await db.collection('price_reports').updateOne(
+        { id: reportId },
+        {
+          $set: {
+            status: action.decision,
+            reviewNotes: action.reviewNotes,
+            reviewedByUserId: action.reviewedByUserId,
+            reviewedAt: now,
+            updatedAt: now,
+          },
+        }
+      );
+
+      const resolved = await this.getPriceReportById(reportId);
+      if (resolved && action.decision === 'accepted' && action.updateProviderPrice) {
+        await this.updateServicePrice(resolved.providerId, resolved.serviceId || '', {
+          amountMinor: resolved.reportedAmountMinor,
+          lastConfirmedAt: now,
+          sourceType: 'patient_reported_community',
+          notes: `Updated via verified patient price report: ${resolved.evidenceOrReceiptNotes}`,
+        });
+      }
+
+      return resolved;
+    } catch {
+      return this.fallback.resolvePriceReport(reportId, action);
+    }
+  }
+
+  async updateServicePrice(
+    providerId: string,
+    serviceId: string,
+    updates: Partial<ServicePrice>
+  ): Promise<Provider | null> {
+    const db = await this.getDb();
+    if (!db) return this.fallback.updateServicePrice(providerId, serviceId, updates);
+
+    try {
+      const now = new Date().toISOString();
+      const updateDoc: Record<string, unknown> = {
+        'services.$.lastConfirmedAt': updates.lastConfirmedAt || now,
+        updatedAt: now,
+      };
+      if (updates.amountMinor !== undefined) updateDoc['services.$.amountMinor'] = updates.amountMinor;
+      if (updates.sourceType !== undefined) updateDoc['services.$.sourceType'] = updates.sourceType;
+      if (updates.notes !== undefined) updateDoc['services.$.notes'] = updates.notes;
+
+      await db.collection('providers').updateOne(
+        { id: providerId, 'services.id': serviceId },
+        { $set: updateDoc }
+      );
+
+      return this.getProviderById(providerId);
+    } catch {
+      return this.fallback.updateServicePrice(providerId, serviceId, updates);
     }
   }
 

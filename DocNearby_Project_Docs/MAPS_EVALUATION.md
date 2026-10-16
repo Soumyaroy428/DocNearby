@@ -49,3 +49,4 @@ This evaluation reviews three mapping provider strategies against our core produ
 
 - **Optional Geolocation:** Browser location is requested strictly on-demand after an explicit user click on the "Use My Location" or "Near Me" button. No automatic popups on initial page load.
 - **Data Minimization:** Exact user coordinates are never stored in user database profiles or logged in persistent server storage. They are used purely ephemerally as search query parameters.
+

@@ -8,6 +8,7 @@ import { AiSearchBox } from '@/client/components/search/AiSearchBox';
 import { FilterBar } from '@/client/components/search/FilterBar';
 import { ProviderCard } from '@/client/components/providers/ProviderCard';
 import { ProviderMapView } from '@/client/components/maps/ProviderMapView';
+import { ProviderComparisonDrawer } from '@/client/components/pricing/ProviderComparisonDrawer';
 
 export function HomePageView() {
   const [viewMode, setViewMode] = useState<'cards' | 'map'>('cards');
@@ -38,6 +39,7 @@ export function HomePageView() {
   const [result, setResult] = useState<PaginatedResult<Provider> | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [compareList, setCompareList] = useState<Provider[]>([]);
 
   // Fetch search metadata (dropdown options) on mount
   useEffect(() => {
@@ -138,6 +140,28 @@ export function HomePageView() {
       providerType: intent.providerType || undefined,
       page: 1,
     }));
+  };
+
+  const handleToggleCompare = (provider: Provider) => {
+    setCompareList((prev) => {
+      const exists = prev.some((p) => p.id === provider.id);
+      if (exists) {
+        return prev.filter((p) => p.id !== provider.id);
+      }
+      if (prev.length >= 3) {
+        alert('You can compare a maximum of 3 healthcare providers at once.');
+        return prev;
+      }
+      return [...prev, provider];
+    });
+  };
+
+  const handleRemoveCompare = (providerId: string) => {
+    setCompareList((prev) => prev.filter((p) => p.id !== providerId));
+  };
+
+  const handleClearCompare = () => {
+    setCompareList([]);
   };
 
   return (
@@ -298,7 +322,12 @@ export function HomePageView() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {result.data.map((provider) => (
-                <ProviderCard key={provider.id} provider={provider} />
+                <ProviderCard
+                  key={provider.id}
+                  provider={provider}
+                  isComparing={compareList.some((p) => p.id === provider.id)}
+                  onToggleCompare={handleToggleCompare}
+                />
               ))}
             </div>
           )
@@ -344,6 +373,13 @@ export function HomePageView() {
           </div>
         </div>
       </section>
+
+      {/* Floating Side-by-Side Comparison Drawer */}
+      <ProviderComparisonDrawer
+        selectedProviders={compareList}
+        onRemove={handleRemoveCompare}
+        onClear={handleClearCompare}
+      />
     </div>
   );
 }

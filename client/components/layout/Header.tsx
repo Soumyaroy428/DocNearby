@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { HeartPulse, AlertCircle, Search, ShieldCheck, User, Stethoscope, ShieldAlert } from 'lucide-react';
+import { HeartPulse, AlertCircle, Search, ShieldCheck, User, Stethoscope, ShieldAlert, Scale } from 'lucide-react';
 import { UserPublicProfile } from '@/shared/types/auth';
 
 export function Header() {
@@ -72,13 +72,24 @@ export function Header() {
             </Link>
 
             {user?.role === 'admin' && (
-              <Link
-                href="/admin/verification"
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 text-xs font-semibold transition-colors"
-              >
-                <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
-                <span>Admin Review</span>
-              </Link>
+              <div className="flex items-center gap-1.5">
+                <Link
+                  href="/admin/verification"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 text-xs font-semibold transition-colors"
+                  title="Provider Verifications"
+                >
+                  <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
+                  <span className="hidden md:inline">Verifications</span>
+                </Link>
+                <Link
+                  href="/admin/price-reports"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-800 hover:bg-indigo-100 border border-indigo-200 text-xs font-semibold transition-colors"
+                  title="Price Reports & Staleness Audits"
+                >
+                  <Scale className="w-3.5 h-3.5 text-indigo-600" />
+                  <span className="hidden md:inline">Price Reports</span>
+                </Link>
+              </div>
             )}
 
             {user ? (

@@ -1,20 +1,23 @@
 import React from 'react';
 import Link from 'next/link';
-import { MapPin, Languages, AlertCircle, Clock, ShieldCheck, ChevronRight, Navigation } from 'lucide-react';
+import { MapPin, Languages, AlertCircle, Clock, ShieldCheck, ChevronRight, Navigation, Scale } from 'lucide-react';
 import { Provider } from '@/shared/types/provider';
-import { formatPaiseToRupees, formatDate, getVerificationBadge, getPriceTypeBadge } from '@/shared/utils/formatters';
+import { formatPaiseToRupees, formatDate, getVerificationBadge, getPriceTypeBadge, checkPriceStaleness } from '@/shared/utils/formatters';
 import { formatDistance, getDirectionsUrl } from '@/shared/utils/geo';
 import { SaveProviderButton } from '@/client/components/providers/SaveProviderButton';
 
 interface ProviderCardProps {
   provider: Provider;
+  isComparing?: boolean;
+  onToggleCompare?: (provider: Provider) => void;
 }
 
-export function ProviderCard({ provider }: ProviderCardProps) {
+export function ProviderCard({ provider, isComparing, onToggleCompare }: ProviderCardProps) {
   const primaryFacility = provider.facilities[0];
   const primaryService = provider.services[0];
   const verification = getVerificationBadge(provider.verificationStatus);
   const priceTypeBadge = primaryService ? getPriceTypeBadge(primaryService.priceType) : null;
+  const staleness = primaryService ? checkPriceStaleness(primaryService.lastConfirmedAt) : null;
 
   const facCoords = primaryFacility?.location?.coordinates;
   const hasCoords = facCoords && Array.isArray(facCoords) && facCoords.length === 2;
@@ -54,6 +57,21 @@ export function ProviderCard({ provider }: ProviderCardProps) {
             <span className="text-xs text-slate-500 capitalize">
               {provider.providerType.replace('_', ' ')}
             </span>
+            {onToggleCompare && (
+              <button
+                type="button"
+                onClick={() => onToggleCompare(provider)}
+                className={`text-xs px-2.5 py-1 rounded-lg border font-medium transition-colors flex items-center gap-1 ${
+                  isComparing
+                    ? 'bg-teal-600 text-white border-teal-600 shadow-2xs'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-teal-500 hover:text-teal-700'
+                }`}
+                title={isComparing ? 'Remove from comparison' : 'Add to side-by-side comparison (max 3)'}
+              >
+                <Scale className="w-3 h-3" />
+                {isComparing ? 'Comparing' : 'Compare'}
+              </button>
+            )}
             <SaveProviderButton providerId={provider.id} />
           </div>
         </div>
@@ -101,25 +119,42 @@ export function ProviderCard({ provider }: ProviderCardProps) {
         {primaryService ? (
           <div className="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-100">
             <div className="flex items-center justify-between text-xs mb-1">
-              <span className="text-slate-600 font-medium truncate max-w-[200px]" title={primaryService.serviceName}>
+              <span className="text-slate-600 font-medium truncate max-w-[180px]" title={primaryService.serviceName}>
                 {primaryService.serviceName}
               </span>
-              {priceTypeBadge && (
-                <span className={`text-[10px] px-2 py-0.5 rounded-full border ${priceTypeBadge.className}`}>
-                  {priceTypeBadge.label}
-                </span>
-              )}
+              <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                {priceTypeBadge && (
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full border ${priceTypeBadge.className}`}>
+                    {priceTypeBadge.label}
+                  </span>
+                )}
+                {staleness && (
+                  <span
+                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border flex items-center gap-1 ${staleness.className}`}
+                    title={staleness.warningMessage || `Confirmed ${staleness.daysAgo} days ago`}
+                  >
+                    <Clock className="w-2.5 h-2.5" />
+                    {staleness.label}
+                  </span>
+                )}
+              </div>
             </div>
 
-            <div className="flex items-baseline justify-between">
+            <div className="flex items-baseline justify-between mt-1">
               <span className="text-lg font-bold text-slate-900 flex items-center">
                 {formatPaiseToRupees(primaryService.amountMinor)}
               </span>
-              <span className="text-[11px] text-slate-500 flex items-center gap-1">
-                <Clock className="w-3 h-3 text-slate-400" />
-                Updated {formatDate(primaryService.lastConfirmedAt)}
+              <span className="text-[11px] text-slate-500">
+                {formatDate(primaryService.lastConfirmedAt)}
               </span>
             </div>
+
+            {staleness?.isStale && (
+              <div className="mt-2 text-[10px] text-amber-800 bg-amber-50/80 border border-amber-200/60 rounded-md p-1.5 flex items-start gap-1">
+                <AlertCircle className="w-3 h-3 text-amber-600 mt-0.5 flex-shrink-0" />
+                <span>Unverified {staleness.daysAgo}d. Additional hospital fees may apply.</span>
+              </div>
+            )}
           </div>
         ) : (
           <div className="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-500 italic">

@@ -299,6 +299,38 @@ Baseline repository audit (CC-00) completed on 2026-10-15. The repository is a *
 
 ---
 
+## Checkpoint CC-05 Evidence Log (Completed 2026-10-16)
+
+### 1. Implemented Capabilities
+- **Price Transparency & Data Invariants (`shared/types/provider.ts`, `shared/utils/formatters.ts`):**
+  - Granular consultation fee metadata: amount (minor integer paise), currency (INR), price type (`confirmed`, `starting_from`, `estimate`, `unavailable`), evidence source (`clinic_verified_fee_schedule`, `reception_confirmed`, `facility_website_published`, `patient_reported_community`), and exact confirmation timestamp (`lastConfirmedAt`).
+  - Stale fee detection (`checkPriceStaleness()`): Quotes older than statutory threshold (90 days) trigger an amber warning badge (`Unverified >90d`) and advisory alert to confirm with front desk reception before visiting.
+  - Relative time helper (`formatRelativeTime()`).
+- **Community Discrepancy Reporting Workflow (`server/validation/price-report.ts`, `server/api/provider-price-report.ts`):**
+  - Zod validation for user discrepancy reports (`priceReportSubmissionSchema`): requires positive integer paise, observed date, and contextual receipt notes.
+  - User submission modal dialog (`client/components/pricing/PriceReportModal.tsx`) accessible from every provider card and details page.
+  - Route handler `POST /api/v1/providers/[id]/price-report` linked to thin adapter `app/api/v1/providers/[id]/price-report/route.ts`.
+- **Administrative Price Audit & Directory Resolution (`server/api/admin-price-reports.ts`, `server/api/admin-resolve-price-report.ts`):**
+  - Administrative dashboard (`client/views/AdminPriceReportsPageView.tsx`, `app/admin/price-reports/page.tsx`): allows Trust Operations to filter reports by status (`pending_review`, `accepted`, `dismissed`), inspect traveler receipt evidence, and execute resolutions.
+  - When approved with `updateProviderPrice: true`, public directory listing price is updated, freshness timestamp reset to now, and source tagged as `patient_reported_community`.
+  - Admin RBAC protected endpoints: `GET /api/v1/admin/price-reports` and `POST /api/v1/admin/price-reports/[id]/resolve`.
+- **Side-by-Side Provider Comparison (`client/components/pricing/ProviderComparisonDrawer.tsx`):**
+  - Floating pill trigger and modal dialog comparing consultation fees, evidence sources, freshness, statutory verification status, spoken languages, and physical accessibility for up to 3 providers simultaneously.
+  - Integrated into `HomePageView.tsx` with compare toggles on `ProviderCard.tsx`.
+- **Navigation Integration (`client/components/layout/Header.tsx`):**
+  - Added dedicated "Price Reports" quick link for administrators alongside "Verifications".
+
+### 2. Actual Test & Build Results
+- **Vitest Unit/Integration Tests (`npm test`):**
+  - `tests/transparent-pricing.test.ts` (21 tests) — PASSED (Fresh vs stale boundaries, custom thresholds, schema validation, submission workflow, admin dismissal, admin acceptance with directory update, fee filter, fee ascending/descending sorting).
+  - All 8 test suites passed: 76/76 tests passed in 4.18s (100% passing).
+- **TypeScript Strict Check (`npm run typecheck`):**
+  - Zero errors reported (`tsc --noEmit` exited with code 0).
+- **Next.js Production Build (`npm run build`):**
+  - Compiled successfully; 22 static and dynamic routes generated cleanly including `/admin/price-reports` and all pricing API routes.
+
+---
+
 ## Required evidence for each update
 Record:
 - Date and checkpoint

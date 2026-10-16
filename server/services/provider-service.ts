@@ -8,10 +8,18 @@ import {
   adminSuspendActionSchema,
 } from '@/server/validation/provider-application';
 import {
+  priceReportSubmissionSchema,
+  PriceReportSubmissionInput,
+  adminResolvePriceReportSchema,
+  AdminResolvePriceReportInput,
+} from '@/server/validation/price-report';
+import {
   Provider,
   PaginatedResult,
   ProviderSubmission,
   SubmissionStatus,
+  PriceCorrectionReport,
+  PriceCorrectionStatus,
 } from '@/shared/types/provider';
 
 export class ProviderService {
@@ -241,6 +249,77 @@ export class ProviderService {
     });
 
     return updated!;
+  }
+
+  // --- CC-05: Price Correction Reports Workflow ---
+
+  async submitPriceReport(
+    userId: string | undefined,
+    rawInput: unknown
+  ): Promise<PriceCorrectionReport> {
+    const validated = priceReportSubmissionSchema.parse(rawInput);
+
+    const provider = await this.repo.getProviderById(validated.providerId, true);
+    if (!provider) {
+      throw new Error(`Provider ${validated.providerId} not found.`);
+    }
+
+    const matchedService = provider.services.find(
+      (s) =>
+        (validated.serviceId && s.id === validated.serviceId) ||
+        (validated.serviceName && s.serviceName.toLowerCase() === validated.serviceName.toLowerCase())
+    );
+
+    if (validated.serviceName && !matchedService && provider.services.length > 0) {
+      throw new Error(`Service "${validated.serviceName}" not found for this provider.`);
+    }
+
+    const serviceObj = matchedService || provider.services[0];
+
+    return this.repo.createPriceReport({
+      providerId: validated.providerId,
+      providerName: provider.displayName,
+      serviceId: validated.serviceId || serviceObj?.id,
+      serviceName: validated.serviceName || serviceObj?.serviceName || 'Consultation Fee',
+      listedAmountMinor: serviceObj?.amountMinor,
+      reportedAmountMinor: validated.reportedAmountMinor,
+      currency: validated.currency,
+      observedDate: validated.observedDate,
+      evidenceOrReceiptNotes: validated.evidenceOrReceiptNotes,
+      submittedByUserId: userId,
+      reporterEmail: validated.reporterEmail || undefined,
+      status: 'pending_review',
+    });
+  }
+
+  async getPriceReports(status?: PriceCorrectionStatus): Promise<PriceCorrectionReport[]> {
+    return this.repo.getPriceReports(status);
+  }
+
+  async resolvePriceReport(
+    adminUserId: string,
+    reportId: string,
+    rawInput: unknown
+  ): Promise<PriceCorrectionReport> {
+    const validated = adminResolvePriceReportSchema.parse(rawInput);
+
+    const report = await this.repo.getPriceReportById(reportId);
+    if (!report) {
+      throw new Error('Price report not found.');
+    }
+
+    const resolved = await this.repo.resolvePriceReport(reportId, {
+      decision: validated.decision,
+      reviewNotes: validated.reviewNotes,
+      reviewedByUserId: adminUserId,
+      updateProviderPrice: validated.updateProviderPrice,
+    });
+
+    if (!resolved) {
+      throw new Error('Failed to resolve price report.');
+    }
+
+    return resolved;
   }
 }
 

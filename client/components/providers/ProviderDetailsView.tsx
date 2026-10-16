@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -11,17 +13,28 @@ import {
   Mail,
   Globe,
   Accessibility,
+  Flag,
 } from 'lucide-react';
-import { Provider } from '@/shared/types/provider';
-import { formatPaiseToRupees, formatDate, getVerificationBadge, getPriceTypeBadge } from '@/shared/utils/formatters';
+import { Provider, ServicePrice } from '@/shared/types/provider';
+import {
+  formatPaiseToRupees,
+  formatDate,
+  getVerificationBadge,
+  getPriceTypeBadge,
+  getSourceTypeLabel,
+  checkPriceStaleness,
+} from '@/shared/utils/formatters';
 import { SaveProviderButton } from '@/client/components/providers/SaveProviderButton';
 import { FacilityMap } from '@/client/components/maps/FacilityMap';
+import { PriceReportModal } from '@/client/components/pricing/PriceReportModal';
 
 interface ProviderDetailsViewProps {
   provider: Provider;
 }
 
 export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [selectedReportService, setSelectedReportService] = useState<ServicePrice | undefined>(undefined);
   const verification = getVerificationBadge(provider.verificationStatus);
 
   return (
@@ -216,7 +229,7 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-2xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="text-base font-bold text-slate-900">
               Services & Transparent Pricing
@@ -225,9 +238,24 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
               Recorded consultation fees with documented verification source and freshness timestamp
             </p>
           </div>
-          <span className="text-xs text-slate-500 font-medium bg-slate-100 px-3 py-1 rounded-full w-fit">
-            Currency: INR (₹)
-          </span>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-500 font-medium bg-slate-100 px-3 py-1 rounded-full w-fit">
+              Currency: INR (₹)
+            </span>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedReportService(undefined);
+                setIsReportModalOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors shadow-2xs"
+            >
+              <Flag className="w-3.5 h-3.5 text-amber-600" />
+              Report Discrepancy
+            </button>
+          </div>
         </div>
 
         {provider.services && provider.services.length > 0 ? (
@@ -238,13 +266,15 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
                   <th className="py-3 px-4">Service Description</th>
                   <th className="py-3 px-4">Consultation Fee</th>
                   <th className="py-3 px-4">Price Type</th>
-                  <th className="py-3 px-4">Source & Verification</th>
-                  <th className="py-3 px-4">Last Confirmed</th>
+                  <th className="py-3 px-4">Source & Evidence</th>
+                  <th className="py-3 px-4">Freshness Status</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
                 {provider.services.map((srv) => {
                   const badge = getPriceTypeBadge(srv.priceType);
+                  const staleness = checkPriceStaleness(srv.lastConfirmedAt);
                   return (
                     <tr key={srv.id} className="hover:bg-slate-50/70 transition-colors">
                       <td className="py-3 px-4 font-medium text-slate-900">
@@ -260,8 +290,8 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
                         </span>
                       </td>
                       <td className="py-3 px-4 text-slate-600">
-                        <span className="font-medium text-slate-800 capitalize">
-                          {srv.sourceType.replace(/_/g, ' ')}
+                        <span className="font-medium text-slate-800">
+                          {getSourceTypeLabel(srv.sourceType)}
                         </span>
                         {srv.sourceReference && (
                           <span className="block text-[10px] text-slate-400 truncate max-w-[200px]" title={srv.sourceReference}>
@@ -269,8 +299,25 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
                           </span>
                         )}
                       </td>
-                      <td className="py-3 px-4 text-slate-500 font-medium whitespace-nowrap">
-                        {formatDate(srv.lastConfirmedAt)}
+                      <td className="py-3 px-4 text-slate-600 whitespace-nowrap">
+                        <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full border font-medium ${staleness.className}`}>
+                          {staleness.label}
+                        </span>
+                        <span className="block text-[10px] text-slate-400 mt-0.5">
+                          {formatDate(srv.lastConfirmedAt)}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedReportService(srv);
+                            setIsReportModalOpen(true);
+                          }}
+                          className="text-xs text-slate-500 hover:text-amber-700 underline font-medium"
+                        >
+                          Report correction
+                        </button>
                       </td>
                     </tr>
                   );
@@ -291,6 +338,13 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
           </span>
         </div>
       </div>
+
+      <PriceReportModal
+        provider={provider}
+        service={selectedReportService}
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+      />
     </div>
   );
 }

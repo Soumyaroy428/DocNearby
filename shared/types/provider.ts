@@ -166,3 +166,36 @@ export interface ApiResponse<T> {
   } | null;
   meta?: Record<string, unknown>;
 }
+
+// --- CC-05: Transparent Pricing & Correction Workflow Types ---
+
+export type PriceCorrectionStatus = 'pending_review' | 'accepted' | 'dismissed';
+
+export interface PriceCorrectionReport {
+  id: string;
+  providerId: string;
+  providerName?: string;
+  serviceId?: string;
+  serviceName?: string;
+  listedAmountMinor?: number;
+  reportedAmountMinor: number;
+  currency: string;
+  observedDate: string; // ISO date string (YYYY-MM-DD)
+  evidenceOrReceiptNotes: string;
+  submittedByUserId?: string;
+  reporterEmail?: string;
+  status: PriceCorrectionStatus;
+  reviewNotes?: string;
+  reviewedByUserId?: string;
+  reviewedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PriceStalenessInfo {
+  isStale: boolean;
+  daysAgo: number;
+  label: string;
+  warningMessage?: string;
+}
+
