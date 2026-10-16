@@ -1,20 +1,26 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, AlertCircle, RefreshCw, Shield } from 'lucide-react';
+import { Search, AlertCircle, RefreshCw, Shield, LayoutGrid, Map as MapIcon } from 'lucide-react';
 import { Provider, SearchFilters, PaginatedResult } from '@/shared/types/provider';
 import { ValidatedAiSearchIntent } from '@/server/validation/search';
 import { AiSearchBox } from '@/client/components/search/AiSearchBox';
 import { FilterBar } from '@/client/components/search/FilterBar';
 import { ProviderCard } from '@/client/components/providers/ProviderCard';
+import { ProviderMapView } from '@/client/components/maps/ProviderMapView';
 
 export function HomePageView() {
+  const [viewMode, setViewMode] = useState<'cards' | 'map'>('cards');
   const [filters, setFilters] = useState<SearchFilters>({
     city: '',
     specialty: '',
     language: '',
     maxFeeMinor: undefined,
     providerType: undefined,
+    latitude: undefined,
+    longitude: undefined,
+    radiusKm: undefined,
+    sortBy: undefined,
     page: 1,
     limit: 10,
   });
@@ -63,6 +69,16 @@ export function HomePageView() {
         params.set('maxFeeMinor', String(currentFilters.maxFeeMinor));
       }
       if (currentFilters.providerType) params.set('providerType', currentFilters.providerType);
+      if (typeof currentFilters.latitude === 'number' && typeof currentFilters.longitude === 'number') {
+        params.set('latitude', String(currentFilters.latitude));
+        params.set('longitude', String(currentFilters.longitude));
+      }
+      if (typeof currentFilters.radiusKm === 'number') {
+        params.set('radiusKm', String(currentFilters.radiusKm));
+      }
+      if (currentFilters.sortBy) {
+        params.set('sortBy', currentFilters.sortBy);
+      }
       if (currentFilters.page) params.set('page', String(currentFilters.page));
       if (currentFilters.limit) params.set('limit', String(currentFilters.limit));
 
@@ -103,6 +119,10 @@ export function HomePageView() {
       language: '',
       maxFeeMinor: undefined,
       providerType: undefined,
+      latitude: undefined,
+      longitude: undefined,
+      radiusKm: undefined,
+      sortBy: undefined,
       page: 1,
       limit: 10,
     });
@@ -156,7 +176,7 @@ export function HomePageView() {
 
       {/* Results Header and Provider Cards */}
       <section aria-label="Search Results" className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <h2 className="text-base font-bold text-slate-900">
               Healthcare Providers
@@ -168,15 +188,45 @@ export function HomePageView() {
             )}
           </div>
 
-          <button
-            onClick={() => loadProviders(filters)}
-            disabled={isLoading}
-            className="text-xs text-slate-600 hover:text-teal-700 flex items-center gap-1 disabled:opacity-50"
-            title="Refresh results"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
+          <div className="flex items-center gap-3">
+            {/* View Mode Toggle: Cards vs Map */}
+            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+              <button
+                type="button"
+                onClick={() => setViewMode('cards')}
+                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
+                  viewMode === 'cards'
+                    ? 'bg-white text-slate-900 shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                Cards
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('map')}
+                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
+                  viewMode === 'map'
+                    ? 'bg-white text-teal-800 shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <MapIcon className="w-3.5 h-3.5 text-teal-600" />
+                Map View
+              </button>
+            </div>
+
+            <button
+              onClick={() => loadProviders(filters)}
+              disabled={isLoading}
+              className="text-xs text-slate-600 hover:text-teal-700 flex items-center gap-1 disabled:opacity-50"
+              title="Refresh results"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </div>
         </div>
 
         {/* Loading skeleton */}
@@ -234,13 +284,24 @@ export function HomePageView() {
           </div>
         )}
 
-        {/* Provider Cards Grid */}
+        {/* Provider Cards Grid or Map View */}
         {!isLoading && !error && result && result.data.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {result.data.map((provider) => (
-              <ProviderCard key={provider.id} provider={provider} />
-            ))}
-          </div>
+          viewMode === 'map' ? (
+            <ProviderMapView
+              providers={result.data}
+              userCoordinates={
+                typeof filters.latitude === 'number' && typeof filters.longitude === 'number'
+                  ? { latitude: filters.latitude, longitude: filters.longitude }
+                  : null
+              }
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {result.data.map((provider) => (
+                <ProviderCard key={provider.id} provider={provider} />
+              ))}
+            </div>
+          )
         )}
       </section>
 

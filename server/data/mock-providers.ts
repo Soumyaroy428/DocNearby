@@ -94,6 +94,10 @@ export const DEMO_PROVIDERS: Provider[] = [
         city: 'Kolkata',
         state: 'West Bengal',
         country: 'India',
+        location: {
+          type: 'Point',
+          coordinates: [88.4172, 22.5867], // Salt Lake Sector 18
+        },
         publicPhone: '+91 33 2222 0002',
         hours: 'Mon-Fri: 9:00 AM - 5:00 PM',
         accessibilityAttributes: ['Ground floor entrance']
@@ -135,6 +139,10 @@ export const DEMO_PROVIDERS: Provider[] = [
         city: 'Kolkata',
         state: 'West Bengal',
         country: 'India',
+        location: {
+          type: 'Point',
+          coordinates: [88.3639, 22.5186], // Gariahat / Rashbehari Ave
+        },
         publicPhone: '+91 33 2222 0003',
         hours: '24 Hours Emergency & Day Diagnostics',
         accessibilityAttributes: ['Wheelchair accessible entrance', 'Ramp access', 'Accessible restrooms']
@@ -196,6 +204,10 @@ export const DEMO_PROVIDERS: Provider[] = [
         city: 'Kolkata',
         state: 'West Bengal',
         country: 'India',
+        location: {
+          type: 'Point',
+          coordinates: [88.3618, 22.5310], // Ballygunge Circular Rd
+        },
         publicPhone: '+91 33 2222 0004',
         hours: 'Mon-Sat: 4:00 PM - 8:30 PM',
         accessibilityAttributes: ['Stroller accessible', 'Elevator access']
@@ -237,8 +249,13 @@ export const DEMO_PROVIDERS: Provider[] = [
         city: 'New Delhi',
         state: 'Delhi',
         country: 'India',
+        location: {
+          type: 'Point',
+          coordinates: [77.2167, 28.6315], // Connaught Place, New Delhi
+        },
         publicPhone: '+91 11 2333 0005',
-        hours: 'Mon-Sat: 10:00 AM - 7:00 PM'
+        hours: 'Mon-Sat: 10:00 AM - 7:00 PM',
+        accessibilityAttributes: ['Ground floor entrance', 'Wheelchair accessible entrance']
       }
     ],
     services: [

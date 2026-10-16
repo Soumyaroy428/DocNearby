@@ -9,6 +9,10 @@ export const searchQuerySchema = z.object({
   providerType: z.enum(['doctor', 'clinic', 'hospital', 'diagnostic_center']).optional(),
   verificationStatus: z.enum(['verified', 'verification_pending', 'unverified', 'suspended']).optional(),
   query: z.string().trim().max(200).optional(),
+  latitude: z.coerce.number().min(-90, 'Latitude must be between -90 and 90').max(90, 'Latitude must be between -90 and 90').optional(),
+  longitude: z.coerce.number().min(-180, 'Longitude must be between -180 and 180').max(180, 'Longitude must be between -180 and 180').optional(),
+  radiusKm: z.coerce.number().positive('Radius must be positive').max(100, 'Radius cannot exceed 100km').optional(),
+  sortBy: z.enum(['relevance', 'distance', 'fee_asc', 'fee_desc']).optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(10),
 });

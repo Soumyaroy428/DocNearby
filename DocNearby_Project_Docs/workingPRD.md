@@ -253,6 +253,52 @@ Baseline repository audit (CC-00) completed on 2026-10-15. The repository is a *
 
 ---
 
+## Checkpoint CC-04 Evidence Log (Completed 2026-10-16)
+
+### 1. Implemented Capabilities
+- **Mapping Provider Evaluation & Architectural Baseline (`DocNearby_Project_Docs/MAPS_EVALUATION.md`):**
+  - Conducted licensing, cost, privacy, and offline fallback review comparing Leaflet / OpenStreetMap vs. Google Maps Platform vs. Mapbox.
+  - Selected OpenStreetMap embedded tiles for interactive UI, combined with universal web intent navigation URLs (`https://www.google.com/maps/dir/?api=1&destination=LAT,LON`) for free, native device app GPS turn-by-turn routing without external API costs or tracking script injection.
+- **Geospatial Utilities & Validation (`shared/utils/geo.ts`, `server/validation/search.ts`, `shared/types/provider.ts`):**
+  - Added geodetic Haversine calculation: `calculateHaversineDistanceKm()` computing distance in kilometers.
+  - Added coordinate validation `isValidCoordinate()` ensuring latitude is within [-90, 90] and longitude within [-180, 180].
+  - Added human-readable distance formatter: `formatDistance()` (e.g. "450 m away", "2.4 km away").
+  - Extended `searchQuerySchema` with validated `latitude`, `longitude`, `radiusKm` (1-100km), and `sortBy: 'relevance' | 'distance' | 'fee_asc' | 'fee_desc'`.
+  - Added `distanceKm` optional projection on `Provider` model.
+- **Repository Nearby Proximity Search (`server/repositories/provider-repository.ts`):**
+  - Implemented proximity distance calculation across all provider facilities in `MemoryProviderRepository`.
+  - Implemented radius filtering and distance-based sorting (nearest first).
+  - Implemented MongoDB `2dsphere` query support via `$geoWithin` with `$centerSphere` in `MongoProviderRepository` with seamless in-memory fallback.
+  - Retained 100% strict privacy protection: `privateVerificationRecord` remains stripped in all public searches.
+- **Client Geolocation Hook with Permission-Denied Fallback (`client/hooks/useGeolocation.ts`):**
+  - Manages browser geolocation politely: states `idle`, `locating`, `success`, `denied`, `unavailable`, `timeout`.
+  - Never auto-prompts on load; triggers exclusively on user explicit click.
+  - When location permission is denied or unavailable, displays clear guidance: *"Location permission was denied. You can search by entering your city or locality manually."*
+  - Manual location search is 100% operational and never blocked or gated.
+- **Interactive Maps & Navigation UI:**
+  - `client/components/maps/FacilityMap.tsx`: Embedded OpenStreetMap view with turn-by-turn "Get Directions" navigation button, facility hours, and verified accessibility badges (Wheelchair ramp, elevator, ground floor entrance). Fallback renders textual address and directions link if tiles fail.
+  - `client/components/maps/ProviderMapView.tsx`: Directory-wide interactive map view with selectable facility pins and live preview cards.
+  - `client/views/HomePageView.tsx`: Added view mode toggle ("Directory Cards" vs. "Map View"), "Near Me" GPS button, proximity radius dropdown, and Sort By selector.
+  - `client/components/providers/ProviderCard.tsx`: Displays distance badge (e.g. "2.4 km away") and direct "Directions" action button.
+  - `client/components/providers/ProviderDetailsView.tsx`: Integrated `FacilityMap` for each care delivery location.
+
+### 2. Actual Test & Build Results
+- **Vitest Unit/Integration Tests (`npm test`):**
+  - `tests/geospatial-search.test.ts` (13 tests) — PASSED (Validates coordinates bounds, Haversine accuracy, distance formatting, query schema, radius filtering, distance sorting, fee sorting, manual search integrity, and private record sanitization).
+  - `tests/provider-verification.test.ts` (8 tests) — PASSED
+  - `tests/auth-service.test.ts` (9 tests) — PASSED
+  - `tests/object-level-auth.test.ts` (6 tests) — PASSED
+  - `tests/provider-service.test.ts` (11 tests) — PASSED
+  - `tests/ai-search-service.test.ts` (4 tests) — PASSED
+  - `tests/utils.test.ts` (4 tests) — PASSED
+  - **Total:** 55 passed across 7 test suites in 3.60s (100% passing).
+- **TypeScript Strict Check (`npm run typecheck`):**
+  - Clean compilation with 0 errors (`tsc --noEmit` exited with code 0).
+- **Next.js Production Build (`npm run build`):**
+  - Compiled successfully; 20 static and dynamic routes generated cleanly.
+
+---
+
 ## Required evidence for each update
 Record:
 - Date and checkpoint

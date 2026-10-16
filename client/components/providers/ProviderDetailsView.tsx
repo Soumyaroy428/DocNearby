@@ -15,6 +15,7 @@ import {
 import { Provider } from '@/shared/types/provider';
 import { formatPaiseToRupees, formatDate, getVerificationBadge, getPriceTypeBadge } from '@/shared/utils/formatters';
 import { SaveProviderButton } from '@/client/components/providers/SaveProviderButton';
+import { FacilityMap } from '@/client/components/maps/FacilityMap';
 
 interface ProviderDetailsViewProps {
   provider: Provider;
@@ -193,56 +194,23 @@ export function ProviderDetailsView({ provider }: ProviderDetailsViewProps) {
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-2xs space-y-4">
+        <div className="space-y-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center">
               <MapPin className="w-5 h-5" />
             </div>
             <div>
               <h2 className="text-sm font-bold text-slate-900">
-                Facility Location & Hours
+                Facility Location, Map & Directions
               </h2>
               <p className="text-xs text-slate-500">
-                Where care is delivered
+                Turn-by-turn navigation, hours & verified accessibility features
               </p>
             </div>
           </div>
 
           {provider.facilities.map((fac) => (
-            <div key={fac.id} className="space-y-3 text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">
-              <div>
-                <span className="font-bold text-slate-900 text-sm">{fac.name}</span>
-                <p className="text-slate-600 mt-0.5">
-                  {fac.address}, {fac.locality}, {fac.city}, {fac.state || ''} {fac.country}
-                </p>
-              </div>
-
-              {fac.hours && (
-                <div className="flex items-center gap-2 text-slate-700 pt-1">
-                  <Clock className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                  <span>Hours: {fac.hours}</span>
-                </div>
-              )}
-
-              {fac.accessibilityAttributes && fac.accessibilityAttributes.length > 0 && (
-                <div className="pt-2 border-t border-slate-200/60">
-                  <span className="text-[11px] text-slate-500 font-medium flex items-center gap-1 mb-1">
-                    <Accessibility className="w-3.5 h-3.5 text-teal-600" />
-                    Accessibility Features:
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {fac.accessibilityAttributes.map((attr) => (
-                      <span
-                        key={attr}
-                        className="text-[11px] px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200"
-                      >
-                        {attr}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <FacilityMap key={fac.id} facility={fac} />
           ))}
         </div>
       </div>

@@ -1,8 +1,9 @@
 import React from 'react';
 import Link from 'next/link';
-import { MapPin, Languages, AlertCircle, Clock, ShieldCheck, ChevronRight } from 'lucide-react';
+import { MapPin, Languages, AlertCircle, Clock, ShieldCheck, ChevronRight, Navigation } from 'lucide-react';
 import { Provider } from '@/shared/types/provider';
 import { formatPaiseToRupees, formatDate, getVerificationBadge, getPriceTypeBadge } from '@/shared/utils/formatters';
+import { formatDistance, getDirectionsUrl } from '@/shared/utils/geo';
 import { SaveProviderButton } from '@/client/components/providers/SaveProviderButton';
 
 interface ProviderCardProps {
@@ -15,11 +16,14 @@ export function ProviderCard({ provider }: ProviderCardProps) {
   const verification = getVerificationBadge(provider.verificationStatus);
   const priceTypeBadge = primaryService ? getPriceTypeBadge(primaryService.priceType) : null;
 
+  const facCoords = primaryFacility?.location?.coordinates;
+  const hasCoords = facCoords && Array.isArray(facCoords) && facCoords.length === 2;
+
   return (
     <div className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-teal-300 hover:shadow-md transition-all flex flex-col justify-between">
       <div>
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <span
               className={`inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-0.5 rounded-full border ${verification.className}`}
               title={verification.description}
@@ -31,6 +35,13 @@ export function ProviderCard({ provider }: ProviderCardProps) {
               )}
               {verification.label}
             </span>
+
+            {provider.distanceKm !== undefined && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full">
+                <Navigation className="w-3 h-3 text-emerald-600" />
+                {formatDistance(provider.distanceKm)}
+              </span>
+            )}
 
             {provider.isDemonstration && (
               <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
@@ -122,13 +133,28 @@ export function ProviderCard({ provider }: ProviderCardProps) {
           {provider.verificationSummary}
         </span>
 
-        <Link
-          href={`/providers/${provider.id}`}
-          className="inline-flex items-center gap-1 text-xs font-semibold text-teal-700 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-lg transition-colors"
-        >
-          View Details
-          <ChevronRight className="w-3.5 h-3.5" />
-        </Link>
+        <div className="flex items-center gap-2">
+          {hasCoords && (
+            <a
+              href={getDirectionsUrl(facCoords[1], facCoords[0], primaryFacility.name)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-teal-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg transition-colors"
+              title="Get Directions in Maps"
+            >
+              <Navigation className="w-3 h-3 text-teal-600" />
+              Directions
+            </a>
+          )}
+
+          <Link
+            href={`/providers/${provider.id}`}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-teal-700 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            View Details
+            <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import {
 } from '@/shared/types/provider';
 import { DEMO_PROVIDERS } from '@/server/data/mock-providers';
 import { getMongoDb, isMongoConfigured } from '@/server/db/mongodb';
+import { calculateHaversineDistanceKm } from '@/shared/utils/geo';
 
 export interface IProviderRepository {
   findProviders(filters: SearchFilters): Promise<PaginatedResult<Provider>>;
@@ -164,6 +165,68 @@ export class MemoryProviderRepository implements IProviderRepository {
               f.city.toLowerCase().includes(q)
           )
       );
+    }
+
+    // CC-04: Geospatial Calculation & Radius Filter
+    if (typeof filters.latitude === 'number' && typeof filters.longitude === 'number') {
+      const uLat = filters.latitude;
+      const uLon = filters.longitude;
+
+      filtered = filtered.map((p) => {
+        let minDistanceKm: number | undefined = undefined;
+        for (const fac of p.facilities) {
+          if (
+            fac.location?.coordinates &&
+            Array.isArray(fac.location.coordinates) &&
+            fac.location.coordinates.length === 2
+          ) {
+            const [lon, lat] = fac.location.coordinates;
+            const dist = calculateHaversineDistanceKm(uLat, uLon, lat, lon);
+            if (minDistanceKm === undefined || dist < minDistanceKm) {
+              minDistanceKm = dist;
+            }
+          }
+        }
+        return {
+          ...p,
+          distanceKm: minDistanceKm,
+        };
+      });
+
+      // Filter by radius if provided
+      if (typeof filters.radiusKm === 'number' && filters.radiusKm > 0) {
+        const radius = filters.radiusKm;
+        filtered = filtered.filter(
+          (p) => p.distanceKm !== undefined && p.distanceKm <= radius
+        );
+      }
+    }
+
+    // CC-04: Sorting (distance, fee_asc, fee_desc, relevance)
+    const sortBy =
+      filters.sortBy ||
+      (typeof filters.latitude === 'number' && typeof filters.longitude === 'number'
+        ? 'distance'
+        : 'relevance');
+
+    if (sortBy === 'distance') {
+      filtered.sort((a, b) => {
+        const distA = a.distanceKm !== undefined ? a.distanceKm : Infinity;
+        const distB = b.distanceKm !== undefined ? b.distanceKm : Infinity;
+        return distA - distB;
+      });
+    } else if (sortBy === 'fee_asc') {
+      filtered.sort((a, b) => {
+        const feeA = a.services.length > 0 ? Math.min(...a.services.map((s) => s.amountMinor)) : Infinity;
+        const feeB = b.services.length > 0 ? Math.min(...b.services.map((s) => s.amountMinor)) : Infinity;
+        return feeA - feeB;
+      });
+    } else if (sortBy === 'fee_desc') {
+      filtered.sort((a, b) => {
+        const feeA = a.services.length > 0 ? Math.max(...a.services.map((s) => s.amountMinor)) : -Infinity;
+        const feeB = b.services.length > 0 ? Math.max(...b.services.map((s) => s.amountMinor)) : -Infinity;
+        return feeB - feeA;
+      });
     }
 
     // Pagination
@@ -369,6 +432,17 @@ export class MongoProviderRepository implements IProviderRepository {
         ];
       }
 
+      // CC-04: Geospatial Query Filter
+      if (typeof filters.latitude === 'number' && typeof filters.longitude === 'number') {
+        const radiusKm = filters.radiusKm || 10;
+        const radiusInRadians = radiusKm / 6378.1;
+        query['facilities.location'] = {
+          $geoWithin: {
+            $centerSphere: [[filters.longitude, filters.latitude], radiusInRadians],
+          },
+        };
+      }
+
       const page = Math.max(1, filters.page || 1);
       const limit = Math.min(50, Math.max(1, filters.limit || 10));
       const skip = (page - 1) * limit;
@@ -384,12 +458,56 @@ export class MongoProviderRepository implements IProviderRepository {
 
       const totalPages = Math.ceil(total / limit) || 1;
 
+      let sanitizedData = items.map((p: Provider) => {
+        const sanitized = { ...p };
+        delete sanitized.privateVerificationRecord;
+        if (typeof filters.latitude === 'number' && typeof filters.longitude === 'number') {
+          let minDist: number | undefined = undefined;
+          for (const fac of p.facilities) {
+            if (
+              fac.location?.coordinates &&
+              Array.isArray(fac.location.coordinates) &&
+              fac.location.coordinates.length === 2
+            ) {
+              const [lon, lat] = fac.location.coordinates;
+              const d = calculateHaversineDistanceKm(filters.latitude, filters.longitude, lat, lon);
+              if (minDist === undefined || d < minDist) minDist = d;
+            }
+          }
+          sanitized.distanceKm = minDist;
+        }
+        return sanitized;
+      });
+
+      // Sorting
+      const sortBy =
+        filters.sortBy ||
+        (typeof filters.latitude === 'number' && typeof filters.longitude === 'number'
+          ? 'distance'
+          : 'relevance');
+
+      if (sortBy === 'distance') {
+        sanitizedData.sort((a, b) => {
+          const distA = a.distanceKm !== undefined ? a.distanceKm : Infinity;
+          const distB = b.distanceKm !== undefined ? b.distanceKm : Infinity;
+          return distA - distB;
+        });
+      } else if (sortBy === 'fee_asc') {
+        sanitizedData.sort((a, b) => {
+          const feeA = a.services.length > 0 ? Math.min(...a.services.map((s) => s.amountMinor)) : Infinity;
+          const feeB = b.services.length > 0 ? Math.min(...b.services.map((s) => s.amountMinor)) : Infinity;
+          return feeA - feeB;
+        });
+      } else if (sortBy === 'fee_desc') {
+        sanitizedData.sort((a, b) => {
+          const feeA = a.services.length > 0 ? Math.max(...a.services.map((s) => s.amountMinor)) : -Infinity;
+          const feeB = b.services.length > 0 ? Math.max(...b.services.map((s) => s.amountMinor)) : -Infinity;
+          return feeB - feeA;
+        });
+      }
+
       return {
-        data: items.map((p: Provider) => {
-          const sanitized = { ...p };
-          delete sanitized.privateVerificationRecord;
-          return sanitized;
-        }),
+        data: sanitizedData,
         meta: {
           total,
           page,

@@ -36,12 +36,12 @@
 - [x] Report and wait.
 
 ## CC-04 — Maps and location
-- [ ] Select mapping provider after licensing/cost review.
-- [ ] Manual location search.
-- [ ] Optional geolocation with permission-denied fallback.
-- [ ] Geospatial indexes and validated nearby search.
-- [ ] Directions and accessibility information.
-- [ ] Report and wait.
+- [x] Select mapping provider after licensing/cost review.
+- [x] Manual location search.
+- [x] Optional geolocation with permission-denied fallback.
+- [x] Geospatial indexes and validated nearby search.
+- [x] Directions and accessibility information.
+- [x] Report and wait.
 
 ## CC-05 — Transparent pricing
 - [ ] Currency, amount, price type, source, and timestamp.

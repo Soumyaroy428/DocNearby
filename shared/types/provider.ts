@@ -77,6 +77,8 @@ export interface Provider {
   isDemonstration: boolean; // Explicit flag for demo records
   createdAt: string;
   updatedAt: string;
+  /** Calculated distance in kilometers when user coordinates are provided in search */
+  distanceKm?: number;
   /** Private internal verification record (sanitized out in public endpoints) */
   privateVerificationRecord?: PrivateVerificationRecord;
 }
@@ -125,6 +127,8 @@ export interface AdminVerificationAction {
   expiresAt?: string;
 }
 
+export type SearchSortBy = 'relevance' | 'distance' | 'fee_asc' | 'fee_desc';
+
 export interface SearchFilters {
   city?: string;
   locality?: string;
@@ -134,6 +138,10 @@ export interface SearchFilters {
   providerType?: ProviderType;
   verificationStatus?: VerificationStatus;
   query?: string;
+  latitude?: number;
+  longitude?: number;
+  radiusKm?: number;
+  sortBy?: SearchSortBy;
   page?: number;
   limit?: number;
 }

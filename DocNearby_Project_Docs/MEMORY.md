@@ -41,7 +41,8 @@ This file records durable project decisions. Update it only when a decision is c
 - `CC-02 — Authentication and Authorization`: VERIFIED (Registration, login, sessions, roles, saved providers, object-level isolation).
 - `Unified Client/Server Architecture Reorganization`: VERIFIED (Clean separation into `client/`, `server/`, `shared/`, `app/`).
 - `CC-03 — Provider Directory and Verification`: VERIFIED (Provider application onboarding, admin verification governance, evidence records, suspension/reinstatement lifecycle, strict public vs. private field isolation; 42 passing tests).
-- Implementation state: Fully verified and awaiting user review before CC-04.
+- `CC-04 — Maps and Location`: VERIFIED (OpenStreetMap interactive mapping baseline, Haversine proximity calculations, radius filtering, distance sorting, universal navigation intent, permission-denied fallback, 55 passing tests).
+- Implementation state: Fully verified and awaiting user review before CC-05.
 
 
 ## Update policy
