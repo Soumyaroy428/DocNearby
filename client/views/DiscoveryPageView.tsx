@@ -406,23 +406,38 @@ export function DiscoveryPageView() {
       {/* Main Discovery View (Split, Cards, or Map) */}
       {!isLoading && !error && (
         <div>
-          {results.length === 0 ? (
-            <div className="p-12 text-center bg-white border border-slate-200 rounded-3xl shadow-xs space-y-3">
-              <Compass className="w-10 h-10 text-slate-400 mx-auto" />
-              <h3 className="text-base font-bold text-slate-900">
-                {t.discovery.noResultsTitle}
-              </h3>
-              <p className="text-xs text-slate-500 max-w-md mx-auto">
-                {t.discovery.noResultsDesc}
-              </p>
-              <button
-                type="button"
-                onClick={handleResetFilters}
-                className="mt-2 text-xs font-semibold px-4 py-2 rounded-xl bg-teal-50 text-teal-800 border border-teal-200 hover:bg-teal-100 transition-colors"
-              >
-                {t.discovery.resetFilters}
-              </button>
-            </div>
+          {viewMode === 'cards' ? (
+            /* Cards Only Grid */
+            results.length === 0 ? (
+              <div className="p-12 text-center bg-white border border-slate-200 rounded-3xl shadow-xs space-y-3">
+                <Compass className="w-10 h-10 text-slate-400 mx-auto" />
+                <h3 className="text-base font-bold text-slate-900">
+                  {t.discovery.noResultsTitle}
+                </h3>
+                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                  {t.discovery.noResultsDesc}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleResetFilters}
+                  className="mt-2 text-xs font-semibold px-4 py-2 rounded-xl bg-teal-50 text-teal-800 border border-teal-200 hover:bg-teal-100 transition-colors"
+                >
+                  {t.discovery.resetFilters}
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {results.map((listing) => (
+                  <UnifiedResultCard
+                    key={listing.id}
+                    listing={listing}
+                    isSelected={listing.id === selectedListingId}
+                    onSelect={(l) => setSelectedListingId(l.id)}
+                    onRequestAppointment={handleRequestAppointment}
+                  />
+                ))}
+              </div>
+            )
           ) : viewMode === 'map' ? (
             /* Full Map View */
             <div className="space-y-4">
@@ -439,42 +454,50 @@ export function DiscoveryPageView() {
                 }}
               />
             </div>
-          ) : viewMode === 'cards' ? (
-            /* Cards Only Grid */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {results.map((listing) => (
-                <UnifiedResultCard
-                  key={listing.id}
-                  listing={listing}
-                  isSelected={listing.id === selectedListingId}
-                  onSelect={(l) => setSelectedListingId(l.id)}
-                  onRequestAppointment={handleRequestAppointment}
-                />
-              ))}
-            </div>
           ) : (
             /* Split View (Default): Map on Top/Right, Selectable Cards on Left */
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Left Column: Results List */}
+              {/* Left Column: Results List or Empty State */}
               <div className="lg:col-span-6 space-y-4 order-2 lg:order-1 max-h-[750px] overflow-y-auto pr-1">
-                <div className="flex items-center justify-between text-xs text-slate-500 px-1">
-                  <span>
-                    Showing {results.length} results ({meta?.totalDocNearby || 0} DocNearby,{' '}
-                    {meta?.totalGooglePlaces || 0} Google Places)
-                  </span>
-                </div>
+                {results.length === 0 ? (
+                  <div className="p-8 text-center bg-white border border-slate-200 rounded-3xl shadow-xs space-y-3">
+                    <Compass className="w-10 h-10 text-slate-400 mx-auto" />
+                    <h3 className="text-sm font-bold text-slate-900">
+                      {t.discovery.noResultsTitle}
+                    </h3>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      {t.discovery.noResultsDesc}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleResetFilters}
+                      className="mt-2 text-xs font-semibold px-4 py-2 rounded-xl bg-teal-50 text-teal-800 border border-teal-200 hover:bg-teal-100 transition-colors"
+                    >
+                      {t.discovery.resetFilters}
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between text-xs text-slate-500 px-1">
+                      <span>
+                        Showing {results.length} results ({meta?.totalDocNearby || 0} DocNearby,{' '}
+                        {meta?.totalGooglePlaces || 0} Google Places)
+                      </span>
+                    </div>
 
-                <div className="space-y-4">
-                  {results.map((listing) => (
-                    <UnifiedResultCard
-                      key={listing.id}
-                      listing={listing}
-                      isSelected={listing.id === selectedListingId}
-                      onSelect={(l) => setSelectedListingId(l.id)}
-                      onRequestAppointment={handleRequestAppointment}
-                    />
-                  ))}
-                </div>
+                    <div className="space-y-4">
+                      {results.map((listing) => (
+                        <UnifiedResultCard
+                          key={listing.id}
+                          listing={listing}
+                          isSelected={listing.id === selectedListingId}
+                          onSelect={(l) => setSelectedListingId(l.id)}
+                          onRequestAppointment={handleRequestAppointment}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Right Column: Interactive Google Discovery Map */}

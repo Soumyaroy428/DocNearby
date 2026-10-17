@@ -156,6 +156,28 @@ export class GooglePlacesService {
   }
 
   /**
+   * Helper to build request headers with appropriate Referer to support HTTP Referrer restricted keys
+   */
+  private getHeaders(key: string, customFieldMask?: string): Record<string, string> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': key,
+      'X-Goog-FieldMask': customFieldMask || FIELD_MASK,
+    };
+
+    // When keys have HTTP Referrer restrictions in Google Cloud Console,
+    // server-side requests must provide an authorized Referer:
+    const referer =
+      process.env.APP_URL ||
+      process.env.NEXTAUTH_URL ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+      'https://docnearby.vercel.app/';
+
+    headers['Referer'] = referer.endsWith('/') ? referer : `${referer}/`;
+    return headers;
+  }
+
+  /**
    * Search nearby using Google Places API (New)
    */
   private async executeNearbySearch(
@@ -183,11 +205,7 @@ export class GooglePlacesService {
 
       const response = await this.fetchFn(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-Api-Key': key,
-          'X-Goog-FieldMask': FIELD_MASK,
-        },
+        headers: this.getHeaders(key),
         body: JSON.stringify(body),
         signal: controller.signal,
       });
@@ -238,11 +256,7 @@ export class GooglePlacesService {
 
       const response = await this.fetchFn(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-Api-Key': key,
-          'X-Goog-FieldMask': FIELD_MASK,
-        },
+        headers: this.getHeaders(key),
         body: JSON.stringify(body),
         signal: controller.signal,
       });
@@ -288,11 +302,10 @@ export class GooglePlacesService {
       const endpoint = `https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`;
       const response = await this.fetchFn(endpoint, {
         method: 'GET',
-        headers: {
-          'X-Goog-Api-Key': key,
-          'X-Goog-FieldMask':
-            'id,displayName,formattedAddress,location,nationalPhoneNumber,websiteUri,regularOpeningHours,rating,userRatingCount,types,googleMapsUri',
-        },
+        headers: this.getHeaders(
+          key,
+          'id,displayName,formattedAddress,location,nationalPhoneNumber,websiteUri,regularOpeningHours,rating,userRatingCount,types,googleMapsUri'
+        ),
         signal: controller.signal,
       });
 
