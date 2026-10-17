@@ -116,6 +116,17 @@ export function GoogleDiscoveryMap({
       return () => clearInterval(checkInterval);
     }
 
+    // Intercept Google Maps authentication/authorization failures (e.g. ApiNotActivatedMapError, BillingNotEnabledMapError, RefererNotAllowedMapError)
+    (window as any).gm_authFailure = () => {
+      console.warn('Google Maps authentication failure. Ensure Maps JavaScript API is enabled in Google Cloud Console.');
+      window.__googleMapsLoading = false;
+      setLoadError(
+        'Google Maps API Key detected, but "Maps JavaScript API" or billing is not yet activated on your Google Cloud Console project (DocNearby2026). Displaying interactive OpenStreetMap view.'
+      );
+      setMapEngine('fallback');
+      setIsLoading(false);
+    };
+
     window.__googleMapsLoading = true;
     const script = document.createElement('script');
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,marker&v=weekly&solution_channel=GMP_GE_mapsandplacesautocomplete_v2`;
