@@ -29,6 +29,7 @@ interface UnifiedResultCardProps {
   isSelected?: boolean;
   onSelect?: (listing: UnifiedHealthcareListing) => void;
   onRequestAppointment?: (providerId: string, providerName: string) => void;
+  onViewProfile?: (listing: UnifiedHealthcareListing) => void;
 }
 
 export function UnifiedResultCard({
@@ -36,6 +37,7 @@ export function UnifiedResultCard({
   isSelected = false,
   onSelect,
   onRequestAppointment,
+  onViewProfile,
 }: UnifiedResultCardProps) {
   const { t } = useLanguage();
   const isGoogle = listing.source === 'google_places';
@@ -110,7 +112,16 @@ export function UnifiedResultCard({
         {/* Title, Facility & Distance */}
         <div>
           <div className="flex items-start justify-between gap-2">
-            <h3 className="text-base font-bold text-slate-900 group-hover:text-teal-600 transition-colors">
+            <h3
+              onClick={(e) => {
+                if (onViewProfile) {
+                  e.stopPropagation();
+                  onViewProfile(listing);
+                }
+              }}
+              className="text-base font-bold text-slate-900 hover:text-teal-600 transition-colors cursor-pointer"
+              title="Click to view full Google Place profile"
+            >
               {listing.name}
             </h3>
             {listing.distanceKm !== undefined && (
@@ -227,6 +238,21 @@ export function UnifiedResultCard({
               <Globe className="w-3.5 h-3.5 text-slate-500" />
               {t.discovery.web}
             </a>
+          )}
+
+          {onViewProfile && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewProfile(listing);
+              }}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-teal-200 bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-semibold transition-colors"
+              title="View full Google Business Profile"
+            >
+              <Info className="w-3.5 h-3.5 text-teal-600" />
+              <span>{isGoogle ? 'Google Profile' : 'Place Info'}</span>
+            </button>
           )}
 
           <a

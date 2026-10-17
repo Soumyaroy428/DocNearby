@@ -24,6 +24,7 @@ import {
 import { UnifiedHealthcareListing, UnifiedSearchResponse } from '@/shared/types/discovery';
 import { UnifiedResultCard } from '@/client/components/discovery/UnifiedResultCard';
 import { GoogleDiscoveryMap } from '@/client/components/maps/GoogleDiscoveryMap';
+import { GooglePlaceProfileModal } from '@/client/components/discovery/GooglePlaceProfileModal';
 import { useGeolocation, GeolocationCoordinates } from '@/client/hooks/useGeolocation';
 import { BookAppointmentModal } from '@/client/components/appointments/BookAppointmentModal';
 import { Provider } from '@/shared/types/provider';
@@ -51,6 +52,7 @@ export function DiscoveryPageView() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedListingId, setSelectedListingId] = useState<string>('');
+  const [activeProfileListing, setActiveProfileListing] = useState<UnifiedHealthcareListing | null>(null);
 
   // Booking Modal State (CC-06 preservation)
   const [bookingProvider, setBookingProvider] = useState<Provider | null>(null);
@@ -443,6 +445,7 @@ export function DiscoveryPageView() {
                     isSelected={listing.id === selectedListingId}
                     onSelect={(l) => setSelectedListingId(l.id)}
                     onRequestAppointment={handleRequestAppointment}
+                    onViewProfile={(l) => setActiveProfileListing(l)}
                   />
                 ))}
               </div>
@@ -456,6 +459,7 @@ export function DiscoveryPageView() {
                 onSelectListing={(listing) => setSelectedListingId(listing.id)}
                 userCoordinates={userCoords}
                 onRequestAppointment={handleRequestAppointment}
+                onViewProfile={(l) => setActiveProfileListing(l)}
                 onLocationSelect={(loc) => {
                   setCity(loc.name || loc.address);
                   setUserCoords({ latitude: loc.latitude, longitude: loc.longitude });
@@ -502,6 +506,7 @@ export function DiscoveryPageView() {
                           isSelected={listing.id === selectedListingId}
                           onSelect={(l) => setSelectedListingId(l.id)}
                           onRequestAppointment={handleRequestAppointment}
+                          onViewProfile={(l) => setActiveProfileListing(l)}
                         />
                       ))}
                     </div>
@@ -517,6 +522,7 @@ export function DiscoveryPageView() {
                   onSelectListing={(listing) => setSelectedListingId(listing.id)}
                   userCoordinates={userCoords}
                   onRequestAppointment={handleRequestAppointment}
+                  onViewProfile={(l) => setActiveProfileListing(l)}
                   onLocationSelect={(loc) => {
                     setCity(loc.name || loc.address);
                     setUserCoords({ latitude: loc.latitude, longitude: loc.longitude });
@@ -569,6 +575,15 @@ export function DiscoveryPageView() {
             setBookingProvider(null);
             alert('Appointment request submitted successfully!');
           }}
+        />
+      )}
+
+      {/* Google-style Business Profile Modal / Bottom Sheet */}
+      {activeProfileListing && (
+        <GooglePlaceProfileModal
+          listing={activeProfileListing}
+          onClose={() => setActiveProfileListing(null)}
+          onRequestAppointment={handleRequestAppointment}
         />
       )}
     </div>

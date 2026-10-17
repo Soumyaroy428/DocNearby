@@ -15,6 +15,7 @@ import {
   Loader2,
   RefreshCw,
   Search,
+  Info,
 } from 'lucide-react';
 import { UnifiedHealthcareListing } from '@/shared/types/discovery';
 import { formatDistance } from '@/shared/utils/geo';
@@ -27,6 +28,7 @@ interface GoogleDiscoveryMapProps {
   center?: { latitude: number; longitude: number };
   userCoordinates?: { latitude: number; longitude: number } | null;
   onRequestAppointment?: (providerId: string, providerName: string) => void;
+  onViewProfile?: (listing: UnifiedHealthcareListing) => void;
   onLocationSelect?: (location: {
     name: string;
     address: string;
@@ -50,6 +52,7 @@ export function GoogleDiscoveryMap({
   center,
   userCoordinates,
   onRequestAppointment,
+  onViewProfile,
   onLocationSelect,
 }: GoogleDiscoveryMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -60,6 +63,19 @@ export function GoogleDiscoveryMap({
   const autocompleteRef = useRef<any>(null);
   const placeSearchMarkerRef = useRef<any>(null);
   const placeSearchInfoWindowRef = useRef<any>(null);
+
+  // Global handler for InfoWindow HTML buttons to open profile modal
+  useEffect(() => {
+    (window as any).__openGooglePlaceProfile = (id: string) => {
+      const listing = listings.find((l) => l.id === id);
+      if (listing && onViewProfile) {
+        onViewProfile(listing);
+      }
+    };
+    return () => {
+      delete (window as any).__openGooglePlaceProfile;
+    };
+  }, [listings, onViewProfile]);
 
   const [mapEngine, setMapEngine] = useState<'google' | 'fallback'>('google');
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -245,11 +261,19 @@ export function GoogleDiscoveryMap({
               <p style="margin: 0 0 6px 0; font-size: 11px; color: #64748b;">${listing.address}</p>
               ${
                 listing.distanceKm !== undefined
-                  ? `<span style="font-size: 11px; font-weight: 600; color: #047857;">${formatDistance(
+                  ? `<div style="font-size: 11px; font-weight: 600; color: #047857; margin-bottom: 6px;">${formatDistance(
                       listing.distanceKm
-                    )}</span>`
+                    )}</div>`
                   : ''
               }
+              <div style="margin-top: 6px; display: flex; gap: 6px;">
+                <button onclick="window.__openGooglePlaceProfile && window.__openGooglePlaceProfile('${listing.id}')" style="cursor: pointer; font-size: 11px; padding: 4px 8px; border-radius: 6px; background: #0d9488; color: #ffffff; border: none; font-weight: 600;">
+                  View Profile
+                </button>
+                <a href="${listing.directionsUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 11px; padding: 4px 8px; border-radius: 6px; background: #f1f5f9; color: #334155; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center;">
+                  Directions
+                </a>
+              </div>
             </div>
           `;
 
@@ -574,6 +598,18 @@ export function GoogleDiscoveryMap({
 
           {/* CTAs */}
           <div className="flex items-center gap-2 pt-1">
+            {onViewProfile && (
+              <button
+                type="button"
+                onClick={() => onViewProfile(selectedListing)}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border border-teal-200 bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-semibold transition-colors"
+                title="View Google Place Profile & Details"
+              >
+                <Info className="w-3.5 h-3.5 text-teal-600" />
+                Profile
+              </button>
+            )}
+
             <a
               href={selectedListing.directionsUrl}
               target="_blank"

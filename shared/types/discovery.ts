@@ -36,6 +36,16 @@ export interface GooglePlaceRaw {
   userRatingCount?: number;
   types?: string[];
   googleMapsUri?: string;
+  accessibilityOptions?: {
+    wheelchairAccessibleParking?: boolean;
+    wheelchairAccessibleEntrance?: boolean;
+    wheelchairAccessibleRestroom?: boolean;
+    wheelchairAccessibleSeating?: boolean;
+  };
+  primaryTypeDisplayName?: {
+    text: string;
+    languageCode?: string;
+  };
 }
 
 export interface UnifiedHealthcareListing {
@@ -97,6 +107,16 @@ export interface UnifiedHealthcareListing {
   userRatingCount?: number;
   openingHours?: string[];
   openNow?: boolean;
+  types?: string[];
+  primaryTypeLabel?: string;
+  accessibility?: {
+    wheelchairAccessible?: boolean;
+    wheelchairParking?: boolean;
+    wheelchairEntrance?: boolean;
+    wheelchairRestroom?: boolean;
+  };
+  photos?: string[];
+  localName?: string;
 
   // DocNearby specific metadata
   specialties?: string[];

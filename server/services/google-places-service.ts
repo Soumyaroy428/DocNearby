@@ -30,18 +30,21 @@ interface CacheEntry {
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes cache
 const REQUEST_TIMEOUT_MS = 5000; // 5 seconds timeout
 
-// Standard healthcare place types recognized by Google Places API
+// Standard healthcare place types recognized by Google Places API (New)
 const HEALTHCARE_PLACE_TYPES = [
-  'hospital',
   'doctor',
-  'pharmacy',
+  'hospital',
   'medical_clinic',
-  'physiotherapist',
+  'pharmacy',
   'dentist',
+  'physiotherapist',
+  'dental_clinic',
+  'medical_lab',
+  'drugstore',
 ];
 
 const FIELD_MASK =
-  'places.id,places.displayName,places.formattedAddress,places.location,places.nationalPhoneNumber,places.websiteUri,places.regularOpeningHours,places.rating,places.userRatingCount,places.types,places.googleMapsUri';
+  'places.id,places.displayName,places.formattedAddress,places.location,places.nationalPhoneNumber,places.websiteUri,places.regularOpeningHours,places.rating,places.userRatingCount,places.types,places.googleMapsUri,places.accessibilityOptions,places.primaryTypeDisplayName';
 
 export class GooglePlacesService {
   private cache = new Map<string, CacheEntry>();
@@ -109,10 +112,9 @@ export class GooglePlacesService {
       let places: GooglePlaceRaw[] = [];
 
       if (options.query || options.specialty) {
-        // Text Search
-        const textQuery = [options.query, options.specialty, 'healthcare doctor clinic hospital']
-          .filter(Boolean)
-          .join(' ');
+        // Text Search: maintain exact user query intent or specialty
+        const queryTerms = [options.query, options.specialty].filter(Boolean).join(' ');
+        const textQuery = queryTerms.trim() || 'doctor clinic hospital medical center';
 
         places = await this.executeTextSearch(textQuery, options, key);
       } else if (
@@ -194,6 +196,7 @@ export class GooglePlacesService {
       const body = {
         includedTypes: HEALTHCARE_PLACE_TYPES,
         maxResultCount: Math.min(limit, 20),
+        rankPreference: 'DISTANCE',
         locationRestriction: {
           circle: {
             center: { latitude, longitude },

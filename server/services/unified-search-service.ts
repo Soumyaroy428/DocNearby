@@ -267,10 +267,21 @@ export class UnifiedSearchService {
     let providerType: 'doctor' | 'clinic' | 'hospital' | 'diagnostic_center' | 'pharmacy' = 'clinic';
     if (place.types?.includes('hospital')) {
       providerType = 'hospital';
-    } else if (place.types?.includes('pharmacy')) {
+    } else if (place.types?.includes('pharmacy') || place.types?.includes('drugstore')) {
       providerType = 'pharmacy';
-    } else if (place.types?.includes('doctor')) {
+    } else if (place.types?.includes('medical_lab')) {
+      providerType = 'diagnostic_center';
+    } else if (
+      place.types?.includes('doctor') ||
+      place.types?.includes('dentist') ||
+      place.types?.includes('physiotherapist')
+    ) {
       providerType = 'doctor';
+    } else if (
+      place.types?.includes('medical_clinic') ||
+      place.types?.includes('dental_clinic')
+    ) {
+      providerType = 'clinic';
     }
 
     const name = place.displayName?.text || 'Healthcare Facility';
@@ -327,6 +338,18 @@ export class UnifiedSearchService {
       userRatingCount: place.userRatingCount,
       openNow: place.regularOpeningHours?.openNow,
       openingHours: place.regularOpeningHours?.weekdayDescriptions,
+      types: place.types,
+      primaryTypeLabel: place.primaryTypeDisplayName?.text,
+      accessibility: {
+        wheelchairAccessible: Boolean(
+          place.accessibilityOptions?.wheelchairAccessibleEntrance ||
+          place.accessibilityOptions?.wheelchairAccessibleParking ||
+          place.accessibilityOptions?.wheelchairAccessibleRestroom
+        ),
+        wheelchairParking: place.accessibilityOptions?.wheelchairAccessibleParking,
+        wheelchairEntrance: place.accessibilityOptions?.wheelchairAccessibleEntrance,
+        wheelchairRestroom: place.accessibilityOptions?.wheelchairAccessibleRestroom,
+      },
     };
   }
 
