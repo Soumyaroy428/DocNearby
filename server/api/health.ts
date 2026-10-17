@@ -22,11 +22,13 @@ export async function handleGetHealth() {
       googlePlaces: {
         configured: Boolean(
           process.env.GOOGLE_MAPS_API_KEY ||
+          process.env.NEXT_GOOGLE_MAPS_API_KEY ||
           process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
           process.env.GOOGLE_PLACES_API_KEY
         ),
         status: Boolean(
           process.env.GOOGLE_MAPS_API_KEY ||
+          process.env.NEXT_GOOGLE_MAPS_API_KEY ||
           process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
           process.env.GOOGLE_PLACES_API_KEY
         )

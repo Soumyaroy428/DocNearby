@@ -368,7 +368,7 @@ GEMINI_API_KEY=AIzaSy...your_gemini_api_key
 GOOGLE_MAPS_API_KEY=AIzaSy...your_server_key
 
 # Browser client key for interactive maps rendering:
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=AIzaSy...your_client_key
+NEXT_GOOGLE_MAPS_API_KEY=AIzaSy...your_client_key
 
 # ==============================================================================
 # Application Environment

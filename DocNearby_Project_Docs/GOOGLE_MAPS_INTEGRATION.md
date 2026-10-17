@@ -99,6 +99,7 @@ DocNearby supports two distinct healthcare discovery sources:
 | Variable | Description | Security Scope |
 |---|---|---|
 | `GOOGLE_MAPS_API_KEY` | Secret API key used server-side for Google Places API (New) requests (`places.googleapis.com`) | Server-Side Only (`.env.local`) |
-| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Public API key used client-side for Google Maps JavaScript SDK rendering | Client-Side (`.env.local`) |
+| `NEXT_GOOGLE_MAPS_API_KEY` | Client API key used for Google Maps JavaScript SDK and Places Autocomplete rendering | Client-Side (`.env.local`) |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Supported alternative alias for client map rendering | Client-Side (`.env.local`) |
 | *Fallback Behavior* | If keys are not configured, the platform operates seamlessly using DocNearby MongoDB discovery and OpenStreetMap / web intent navigation fallbacks. | Zero-breakage guarantee |
 

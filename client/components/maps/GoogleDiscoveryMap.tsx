@@ -90,7 +90,9 @@ export function GoogleDiscoveryMap({
 
   // Load Google Maps JavaScript SDK
   useEffect(() => {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    const apiKey =
+      process.env.NEXT_GOOGLE_MAPS_API_KEY ||
+      process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
     if (!apiKey) {
       // Graceful fallback to OpenStreetMap if no client API key
