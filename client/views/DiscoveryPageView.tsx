@@ -432,6 +432,11 @@ export function DiscoveryPageView() {
                 onSelectListing={(listing) => setSelectedListingId(listing.id)}
                 userCoordinates={userCoords}
                 onRequestAppointment={handleRequestAppointment}
+                onLocationSelect={(loc) => {
+                  setCity(loc.name || loc.address);
+                  setUserCoords({ latitude: loc.latitude, longitude: loc.longitude });
+                  setSortBy('distance');
+                }}
               />
             </div>
           ) : viewMode === 'cards' ? (
@@ -480,6 +485,11 @@ export function DiscoveryPageView() {
                   onSelectListing={(listing) => setSelectedListingId(listing.id)}
                   userCoordinates={userCoords}
                   onRequestAppointment={handleRequestAppointment}
+                  onLocationSelect={(loc) => {
+                    setCity(loc.name || loc.address);
+                    setUserCoords({ latitude: loc.latitude, longitude: loc.longitude });
+                    setSortBy('distance');
+                  }}
                 />
               </div>
             </div>

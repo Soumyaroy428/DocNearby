@@ -14,6 +14,7 @@ import {
   AlertCircle,
   Loader2,
   RefreshCw,
+  Search,
 } from 'lucide-react';
 import { UnifiedHealthcareListing } from '@/shared/types/discovery';
 import { formatDistance } from '@/shared/utils/geo';
@@ -26,6 +27,12 @@ interface GoogleDiscoveryMapProps {
   center?: { latitude: number; longitude: number };
   userCoordinates?: { latitude: number; longitude: number } | null;
   onRequestAppointment?: (providerId: string, providerName: string) => void;
+  onLocationSelect?: (location: {
+    name: string;
+    address: string;
+    latitude: number;
+    longitude: number;
+  }) => void;
 }
 
 declare global {
@@ -43,11 +50,16 @@ export function GoogleDiscoveryMap({
   center,
   userCoordinates,
   onRequestAppointment,
+  onLocationSelect,
 }: GoogleDiscoveryMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markersRef = useRef<Map<string, any>>(new Map());
   const activeInfoWindowRef = useRef<any>(null);
+  const autocompleteInputRef = useRef<HTMLInputElement>(null);
+  const autocompleteRef = useRef<any>(null);
+  const placeSearchMarkerRef = useRef<any>(null);
+  const placeSearchInfoWindowRef = useRef<any>(null);
 
   const [mapEngine, setMapEngine] = useState<'google' | 'fallback'>('google');
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -106,7 +118,7 @@ export function GoogleDiscoveryMap({
 
     window.__googleMapsLoading = true;
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,marker&v=weekly&solution_channel=GMP_GE_mapsandplacesautocomplete_v2`;
     script.async = true;
     script.defer = true;
 
@@ -292,6 +304,98 @@ export function GoogleDiscoveryMap({
     }
   }, [mapEngine, validListings, userCoordinates]);
 
+  // Initialize Google Places Autocomplete on Place Picker search input
+  useEffect(() => {
+    if (
+      mapEngine !== 'google' ||
+      !window.google?.maps?.places ||
+      !mapInstanceRef.current ||
+      !autocompleteInputRef.current
+    ) {
+      return;
+    }
+
+    try {
+      const autocomplete = new window.google.maps.places.Autocomplete(
+        autocompleteInputRef.current,
+        {
+          fields: ['geometry', 'name', 'formatted_address', 'place_id'],
+        }
+      );
+
+      autocomplete.bindTo('bounds', mapInstanceRef.current);
+      autocompleteRef.current = autocomplete;
+
+      if (!placeSearchMarkerRef.current) {
+        placeSearchMarkerRef.current = new window.google.maps.Marker({
+          map: mapInstanceRef.current,
+          anchorPoint: new window.google.maps.Point(0, -29),
+          visible: false,
+        });
+      }
+
+      if (!placeSearchInfoWindowRef.current) {
+        placeSearchInfoWindowRef.current = new window.google.maps.InfoWindow();
+      }
+
+      const listener = autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+
+        if (!place.geometry || !place.geometry.location) {
+          if (place.name) {
+            window.alert("No location details available for input: '" + place.name + "'");
+          }
+          if (placeSearchInfoWindowRef.current) {
+            placeSearchInfoWindowRef.current.close();
+          }
+          if (placeSearchMarkerRef.current) {
+            placeSearchMarkerRef.current.setVisible(false);
+          }
+          return;
+        }
+
+        if (place.geometry.viewport) {
+          mapInstanceRef.current.fitBounds(place.geometry.viewport);
+        } else {
+          mapInstanceRef.current.setCenter(place.geometry.location);
+          mapInstanceRef.current.setZoom(17);
+        }
+
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+
+        placeSearchMarkerRef.current.setPosition(place.geometry.location);
+        placeSearchMarkerRef.current.setVisible(true);
+
+        const content = `
+          <div style="font-family: inherit; padding: 4px 6px; color: #0f172a; max-width: 220px;">
+            <strong style="font-size: 13px;">${place.name || 'Selected Place'}</strong><br/>
+            <span style="font-size: 11px; color: #64748b;">${place.formatted_address || ''}</span>
+          </div>
+        `;
+        placeSearchInfoWindowRef.current.setContent(content);
+        placeSearchInfoWindowRef.current.open(mapInstanceRef.current, placeSearchMarkerRef.current);
+
+        if (onLocationSelect) {
+          onLocationSelect({
+            name: place.name || place.formatted_address || '',
+            address: place.formatted_address || '',
+            latitude: lat,
+            longitude: lng,
+          });
+        }
+      });
+
+      return () => {
+        if (window.google?.maps?.event && listener) {
+          window.google.maps.event.removeListener(listener);
+        }
+      };
+    } catch {
+      // Non-blocking fallback if Autocomplete is restricted
+    }
+  }, [mapEngine, onLocationSelect]);
+
   // Fallback map URL using OpenStreetMap embed
   const delta = 0.02;
   const osmEmbedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${(
@@ -321,17 +425,32 @@ export function GoogleDiscoveryMap({
           </div>
         </div>
 
-        {mapEngine === 'google' && validListings.length > 1 && (
-          <button
-            type="button"
-            onClick={handleFitBounds}
-            className="pointer-events-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 text-slate-700 hover:text-slate-900 shadow-sm text-xs font-semibold transition-colors"
-            title="Fit all markers in view"
-          >
-            <Maximize2 className="w-3.5 h-3.5 text-teal-600" />
-            Fit All
-          </button>
-        )}
+        <div className="flex items-center gap-2 pointer-events-auto">
+          {/* Google Places Autocomplete Place Picker */}
+          {mapEngine === 'google' && (
+            <div className="flex items-center gap-1.5 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm text-xs">
+              <Search className="w-3.5 h-3.5 text-teal-600 flex-shrink-0" />
+              <input
+                ref={autocompleteInputRef}
+                type="text"
+                placeholder="Enter an address or locality..."
+                className="bg-transparent border-0 outline-none text-xs text-slate-800 placeholder-slate-400 w-36 sm:w-56"
+              />
+            </div>
+          )}
+
+          {mapEngine === 'google' && validListings.length > 1 && (
+            <button
+              type="button"
+              onClick={handleFitBounds}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 text-slate-700 hover:text-slate-900 shadow-sm text-xs font-semibold transition-colors"
+              title="Fit all markers in view"
+            >
+              <Maximize2 className="w-3.5 h-3.5 text-teal-600" />
+              Fit All
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Loading Indicator */}
