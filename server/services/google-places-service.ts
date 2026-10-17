@@ -13,6 +13,7 @@ export interface GooglePlacesSearchOptions {
   radiusKm?: number;
   query?: string;
   specialty?: string;
+  city?: string;
   limit?: number;
 }
 
@@ -111,10 +112,14 @@ export class GooglePlacesService {
     try {
       let places: GooglePlaceRaw[] = [];
 
-      if (options.query || options.specialty) {
-        // Text Search: maintain exact user query intent or specialty
-        const queryTerms = [options.query, options.specialty].filter(Boolean).join(' ');
-        const textQuery = queryTerms.trim() || 'doctor clinic hospital medical center';
+      if (options.query || options.specialty || options.city) {
+        // Text Search: maintain exact user query intent, specialty, and city/locality
+        const terms = [
+          options.query,
+          options.specialty,
+          options.city ? `in ${options.city}` : '',
+        ].filter(Boolean);
+        const textQuery = terms.length > 0 ? terms.join(' ') : 'doctor clinic hospital medical center';
 
         places = await this.executeTextSearch(textQuery, options, key);
       } else if (
@@ -407,7 +412,7 @@ export class GooglePlacesService {
   }
 
   private getCacheKey(options: GooglePlacesSearchOptions): string {
-    return `search:${options.latitude?.toFixed(3) ?? 'none'}:${options.longitude?.toFixed(3) ?? 'none'}:${options.radiusKm ?? 10}:${options.query ?? ''}:${options.specialty ?? ''}:${options.limit ?? 20}`;
+    return `search:${options.latitude?.toFixed(3) ?? 'none'}:${options.longitude?.toFixed(3) ?? 'none'}:${options.radiusKm ?? 10}:${options.query ?? ''}:${options.specialty ?? ''}:${options.city ?? ''}:${options.limit ?? 20}`;
   }
 }
 

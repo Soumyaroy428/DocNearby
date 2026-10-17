@@ -223,16 +223,41 @@ export function DiscoveryPageView() {
             <input
               type="text"
               value={city}
-              onChange={(e) => setCity(e.target.value)}
+              onChange={(e) => {
+                setCity(e.target.value);
+                if (userCoords) {
+                  setUserCoords(null);
+                }
+              }}
               placeholder={
                 userCoords
                   ? userCoords.city
-                    ? `Near ${userCoords.city} (Active)`
+                    ? `Near ${userCoords.city}`
                     : 'Near Me (GPS Active)'
                   : 'e.g. Kolkata, Salt Lake'
               }
               className="w-full text-xs px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-1 focus:ring-teal-500 bg-white"
             />
+            {geoError && !userCoords && (
+              <p className="text-[11px] text-amber-600 flex items-center gap-1 mt-0.5">
+                <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                <span>{geoError}</span>
+              </p>
+            )}
+            {userCoords && (
+              <div className="flex items-center justify-between text-[11px] text-emerald-700 mt-0.5">
+                <span className="flex items-center gap-1 truncate">
+                  <Navigation className="w-3 h-3 text-emerald-600 flex-shrink-0" />
+                  <strong>{userCoords.source === 'gps' ? 'Device GPS' : 'Network IP'}:</strong>{' '}
+                  <span className="truncate">{userCoords.city || 'Active'}</span>
+                </span>
+                {userCoords.accuracy !== undefined && userCoords.accuracy > 0 && (
+                  <span className="text-[10px] text-slate-400 flex-shrink-0 ml-1">
+                    ±{Math.round(userCoords.accuracy)}m
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Search Radius */}

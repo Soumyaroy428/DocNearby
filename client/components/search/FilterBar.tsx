@@ -139,8 +139,14 @@ export function FilterBar({
               type="text"
               list="city-suggestions"
               value={filters.city || ''}
-              onChange={(e) => onFilterChange('city', e.target.value)}
-              placeholder={isGeoActive ? 'GPS location enabled' : t.filters.cityPlaceholder}
+              onChange={(e) => {
+                onFilterChange('city', e.target.value);
+                if (isGeoActive) {
+                  onFilterChange('latitude', undefined);
+                  onFilterChange('longitude', undefined);
+                }
+              }}
+              placeholder={isGeoActive ? (filters.city ? `Near ${filters.city}` : 'GPS location enabled') : t.filters.cityPlaceholder}
               className="w-full text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 bg-white"
             />
             <datalist id="city-suggestions">
@@ -148,6 +154,12 @@ export function FilterBar({
                 <option key={city} value={city} />
               ))}
             </datalist>
+            {geoError && !isGeoActive && (
+              <p className="text-[11px] text-amber-600 flex items-center gap-1 mt-0.5">
+                <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                <span>{geoError}</span>
+              </p>
+            )}
           </div>
         </div>
 

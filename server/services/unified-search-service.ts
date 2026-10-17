@@ -381,6 +381,7 @@ export class UnifiedSearchService {
       radiusKm: params.radiusKm || 10,
       query: params.query,
       specialty: params.specialty,
+      city: params.city,
       limit: params.limit || 20,
     };
 
