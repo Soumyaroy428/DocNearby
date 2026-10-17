@@ -78,9 +78,6 @@ export function Header() {
               <div>
                 <span className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 flex items-center gap-1">
                   DocNearby
-                  <span className="text-[10px] sm:text-xs font-semibold px-1.5 py-0.5 rounded bg-teal-100 text-teal-800">
-                    Demo
-                  </span>
                 </span>
                 <p className="text-[10px] sm:text-[11px] text-slate-500 hidden sm:block">
                   Trusted Care, Wherever You Are
