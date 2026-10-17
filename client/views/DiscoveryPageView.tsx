@@ -24,7 +24,7 @@ import {
 import { UnifiedHealthcareListing, UnifiedSearchResponse } from '@/shared/types/discovery';
 import { UnifiedResultCard } from '@/client/components/discovery/UnifiedResultCard';
 import { GoogleDiscoveryMap } from '@/client/components/maps/GoogleDiscoveryMap';
-import { useGeolocation } from '@/client/hooks/useGeolocation';
+import { useGeolocation, GeolocationCoordinates } from '@/client/hooks/useGeolocation';
 import { BookAppointmentModal } from '@/client/components/appointments/BookAppointmentModal';
 import { Provider } from '@/shared/types/provider';
 import { useLanguage } from '@/client/context/LanguageContext';
@@ -40,7 +40,7 @@ export function DiscoveryPageView() {
   const [radiusKm, setRadiusKm] = useState<number>(10);
   const [sourceFilter, setSourceFilter] = useState<'all' | 'docnearby' | 'google_places'>('all');
   const [sortBy, setSortBy] = useState<'distance' | 'relevance' | 'rating'>('distance');
-  const [userCoords, setUserCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [userCoords, setUserCoords] = useState<GeolocationCoordinates | null>(null);
 
   // Layout View mode
   const [viewMode, setViewMode] = useState<'split' | 'cards' | 'map'>('split');
@@ -104,6 +104,9 @@ export function DiscoveryPageView() {
     const coords = await requestLocation();
     if (coords) {
       setUserCoords(coords);
+      if (coords.city) {
+        setCity(coords.city);
+      }
       setSortBy('distance');
     }
   };
@@ -206,7 +209,8 @@ export function DiscoveryPageView() {
                 ) : userCoords ? (
                   <>
                     <Navigation className="w-3 h-3 fill-emerald-600 text-emerald-600" />
-                    GPS Active <X className="w-3 h-3 ml-0.5 hover:text-red-600" />
+                    {userCoords.source === 'ip' ? 'Network Loc' : 'GPS Active'}{' '}
+                    <X className="w-3 h-3 ml-0.5 hover:text-red-600" />
                   </>
                 ) : (
                   <>

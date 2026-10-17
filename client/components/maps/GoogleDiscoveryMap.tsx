@@ -304,6 +304,17 @@ export function GoogleDiscoveryMap({
     }
   }, [selectedListingId, mapEngine, selectedListing]);
 
+  // Pan and center to user coordinates when user location is detected
+  useEffect(() => {
+    if (mapEngine === 'google' && mapInstanceRef.current && userCoordinates) {
+      mapInstanceRef.current.panTo({
+        lat: userCoordinates.latitude,
+        lng: userCoordinates.longitude,
+      });
+      mapInstanceRef.current.setZoom(14);
+    }
+  }, [userCoordinates?.latitude, userCoordinates?.longitude, mapEngine]);
+
   const handleFitBounds = useCallback(() => {
     if (mapEngine === 'google' && mapInstanceRef.current && validListings.length > 0) {
       const bounds = new window.google.maps.LatLngBounds();

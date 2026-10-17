@@ -57,6 +57,9 @@ export function FilterBar({
     if (coords) {
       onFilterChange('latitude', coords.latitude);
       onFilterChange('longitude', coords.longitude);
+      if (coords.city) {
+        onFilterChange('city', coords.city);
+      }
       onFilterChange('sortBy', 'distance');
     }
   };
