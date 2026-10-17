@@ -29,10 +29,11 @@ async function fetchIpLocation(): Promise<GeolocationCoordinates | null> {
     if (!res.ok) return null;
     const json = await res.json();
     if (json.success && typeof json.latitude === 'number' && typeof json.longitude === 'number') {
+      const cleanCity = json.city ? json.city.split(',')[0].trim() : undefined;
       return {
         latitude: json.latitude,
         longitude: json.longitude,
-        city: json.city,
+        city: cleanCity,
         source: json.source || 'ip',
       };
     }
@@ -47,38 +48,65 @@ export function useGeolocation(): UseGeolocationReturn {
   const [coordinates, setCoordinates] = useState<GeolocationCoordinates | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const requestLocation = useCallback((): Promise<GeolocationCoordinates | null> => {
-    return new Promise((resolve) => {
-      setState('locating');
-      setErrorMessage(null);
+  const requestLocation = useCallback(async (): Promise<GeolocationCoordinates | null> => {
+    setState('locating');
+    setErrorMessage(null);
 
-      // 1. Check if browser geolocation is supported
-      if (typeof window === 'undefined' || !('geolocation' in navigator)) {
-        // Fallback directly to IP geolocation
-        fetchIpLocation()
-          .then((ipCoords) => {
-            if (ipCoords) {
-              setCoordinates(ipCoords);
-              setState('success');
-              setErrorMessage(null);
-              resolve(ipCoords);
-            } else {
-              setState('unavailable');
-              setErrorMessage('Location could not be determined. Please search by city or locality manually.');
-              resolve(null);
-            }
-          })
-          .catch(() => {
-            setState('unavailable');
-            setErrorMessage('Location service unavailable. Manual search remains available.');
-            resolve(null);
-          });
-        return;
+    // 1. Check permission if Permissions API is supported
+    let isDenied = false;
+    try {
+      if (typeof navigator !== 'undefined' && 'permissions' in navigator) {
+        const status = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+        if (status.state === 'denied') {
+          isDenied = true;
+        }
       }
+    } catch {
+      // Ignore permission query error
+    }
 
-      // 2. Request browser GPS location
+    // If permission is already denied or geolocation is unsupported, resolve via IP immediately:
+    if (isDenied || typeof window === 'undefined' || !('geolocation' in navigator)) {
+      const ipCoords = await fetchIpLocation();
+      if (ipCoords) {
+        setCoordinates(ipCoords);
+        setState('success');
+        setErrorMessage(null);
+        return ipCoords;
+      }
+      setState('denied');
+      setErrorMessage('Location permission was denied. Please search by entering your city manually.');
+      return null;
+    }
+
+    // 2. Request browser GPS with a fast 3.5-second timeout, falling back smoothly to IP
+    return new Promise((resolve) => {
+      let resolved = false;
+
+      // Safety fallback timer: if browser GPS doesn't respond within 3.5s (common on desktop PCs), fallback to IP immediately:
+      const timeoutFallback = setTimeout(async () => {
+        if (!resolved) {
+          resolved = true;
+          const ipCoords = await fetchIpLocation();
+          if (ipCoords) {
+            setCoordinates(ipCoords);
+            setState('success');
+            setErrorMessage(null);
+            resolve(ipCoords);
+          } else {
+            setState('timeout');
+            setErrorMessage('Location request timed out. Please enter your city manually.');
+            resolve(null);
+          }
+        }
+      }, 3500);
+
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          if (resolved) return;
+          resolved = true;
+          clearTimeout(timeoutFallback);
+
           const coords: GeolocationCoordinates = {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
@@ -91,44 +119,28 @@ export function useGeolocation(): UseGeolocationReturn {
           resolve(coords);
         },
         async (error) => {
-          console.warn(`Browser geolocation failed (${error.code}: ${error.message}). Attempting IP fallback...`);
+          if (resolved) return;
+          resolved = true;
+          clearTimeout(timeoutFallback);
 
-          // 3. Graceful Fallback: Resolve via Network IP location
+          console.warn(`Browser GPS unavailable (${error.code}: ${error.message}). Falling back to network IP location...`);
           const ipCoords = await fetchIpLocation();
           if (ipCoords) {
             setCoordinates(ipCoords);
             setState('success');
             setErrorMessage(null);
             resolve(ipCoords);
-            return;
+          } else {
+            setCoordinates(null);
+            setState('unavailable');
+            setErrorMessage('Could not determine your location. Please type your city manually.');
+            resolve(null);
           }
-
-          // 4. If even IP fallback fails, surface descriptive guidance
-          setCoordinates(null);
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
-              setState('denied');
-              setErrorMessage('Location permission was denied. Please allow location in your browser address bar or search by city manually.');
-              break;
-            case error.POSITION_UNAVAILABLE:
-              setState('unavailable');
-              setErrorMessage('GPS signal unavailable. Please search by entering your city or locality manually.');
-              break;
-            case error.TIMEOUT:
-              setState('timeout');
-              setErrorMessage('Location request timed out. Please search by entering your city manually.');
-              break;
-            default:
-              setState('unavailable');
-              setErrorMessage('Unable to determine location. Manual search remains available.');
-              break;
-          }
-          resolve(null);
         },
         {
-          enableHighAccuracy: true, // Request GPS for mobile / precise positioning
-          timeout: 7000,            // 7-second timeout before IP fallback
-          maximumAge: 60000,        // 1-minute cache
+          enableHighAccuracy: false, // Fast, low-latency triangulation
+          timeout: 3000,
+          maximumAge: 60000,
         }
       );
     });

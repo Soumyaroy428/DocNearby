@@ -104,9 +104,8 @@ export function DiscoveryPageView() {
     const coords = await requestLocation();
     if (coords) {
       setUserCoords(coords);
-      if (coords.city) {
-        setCity(coords.city);
-      }
+      // Clear manual city text so GPS radius search finds all healthcare facilities within radius
+      setCity('');
       setSortBy('distance');
     }
   };
@@ -223,7 +222,13 @@ export function DiscoveryPageView() {
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              placeholder={userCoords ? 'GPS location enabled (or type city)' : 'e.g. Kolkata, Salt Lake'}
+              placeholder={
+                userCoords
+                  ? userCoords.city
+                    ? `Near ${userCoords.city} (Active)`
+                    : 'Near Me (GPS Active)'
+                  : 'e.g. Kolkata, Salt Lake'
+              }
               className="w-full text-xs px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-1 focus:ring-teal-500 bg-white"
             />
           </div>

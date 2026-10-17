@@ -166,12 +166,11 @@ export class GooglePlacesService {
     };
 
     // When keys have HTTP Referrer restrictions in Google Cloud Console,
-    // server-side requests must provide an authorized Referer:
+    // server-side requests must provide an authorized Referer matching the console restriction:
     const referer =
-      process.env.APP_URL ||
-      process.env.NEXTAUTH_URL ||
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
-      'https://docnearby.vercel.app/';
+      process.env.NODE_ENV === 'development'
+        ? (process.env.NEXTAUTH_URL || 'http://localhost:3000/')
+        : 'https://docnearby.vercel.app/';
 
     headers['Referer'] = referer.endsWith('/') ? referer : `${referer}/`;
     return headers;

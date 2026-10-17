@@ -139,11 +139,12 @@ export class MemoryProviderRepository implements IProviderRepository {
 
     // Filter by city
     if (filters.city && filters.city.trim() !== '') {
-      const cityQuery = filters.city.trim().toLowerCase();
+      const cityQuery = filters.city.split(',')[0].trim().toLowerCase();
       filtered = filtered.filter((p) =>
         p.facilities.some(
           (f) =>
             f.city.toLowerCase().includes(cityQuery) ||
+            cityQuery.includes(f.city.toLowerCase()) ||
             f.locality.toLowerCase().includes(cityQuery)
         )
       );
